@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LearnFast - Dijital Eğitim Platformu</title>
+    <style>
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5a6fd6;
+            --student-accent: #ff6b6b;
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .card-container {
+            background: #ffffff;
+            padding: 35px;
+            border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 480px;
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-container {
+            max-width: 850px;
+        }
+
+        h2, h3, h4 {
+            color: #2d3748;
+            margin-top: 0;
+        }
+
+        .sub-title {
+            text-align: center;
+            color: #718096;
+            font-size: 14px;
+            margin-top: -10px;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 18px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: #4a5568;
+            font-weight: 600;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e0;
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .captcha-box {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: var(--primary);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-submit:hover {
+            background: var(--primary-dark);
+        }
+
+        .student-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+        }
+
+        .hidden { display: none !important; }
+
+        .divider {
+            text-align: center;
+            margin: 15px 0;
+            color: #a0aec0;
+            font-size: 13px;
+        }
+
+        .option-card {
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            background: #f7fafc;
+        }
+
+        /* ------------------ DASHBOARD ------------------ */
+        .welcome-header {
+            background: #edf2f7;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .subject-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 18px;
+            margin-bottom: 25px;
+        }
+
+        .subject-card {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 25px 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .subject-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.15);
+        }
+
+        .subject-icon {
+            font-size: 38px;
+            margin-bottom: 10px;
+        }
+
+        .subject-title {
+            font-size: 18px;
+            color: #2d3748;
+            font-weight: bold;
+        }
+
+        /* 6 ÜNİTE AKORDEON TİPİ LİSTE */
+        .unit-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .unit-card {
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            background: #ffffff;
+            overflow: hidden;
+        }
+
+        .unit-header {
+            background: #f8fafc;
+            padding: 16px 20px;
+            font-weight: bold;
+            font-size: 16px;
+            color: #2d3748;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
+        }
+
+        .unit-header:hover {
+            background: #edf2f7;
+            color: var(--primary);
+        }
+
+        .unit-body {
+            padding: 20px;
+            background: #faf5ff;
+            border-top: 1px dashed #cbd5e0;
+        }
+
+        .resource-box {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 14px;
+            margin-bottom: 10px;
+        }
+
+        .resource-title {
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .grade-badge {
+            background: #e2e8f0;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #4a5568;
+        }
+
+        .back-btn {
+            background: #e2e8f0;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. GİRİŞ EKRANI -->
+    <div class="card-container" id="loginStep">
+        <h2 style="text-align: center;">LearnFast'e Giriş Yap</h2>
+        <div class="sub-title">🔒 Güvenli Eğitim Portalı</div>
+        
+        <form onsubmit="goToBranchSelection(event)">
+            <div class="input-group">
+                <label for="username">Kullanıcı Adı</label>
+                <input type="text" id="username" required placeholder="Adınız">
+            </div>
+            
+            <div class="input-group">
+                <label for="email">E-posta Adresi</label>
+                <input type="email" id="email" required placeholder="ornek@email.com">
+            </div>
+
+            <div class="input-group">
+                <label for="password">Şifre</label>
+                <input type="password" id="password" required placeholder="••••••••">
+            </div>
+
+            <div class="captcha-box">
+                <input type="checkbox" id="robotCheck" required>
+                <label for="robotCheck">Ben robot değilim</label>
+            </div>
+
+            <button type="submit" class="btn-submit">Devam Et ➔</button>
+        </form>
+    </div>
+
+    <!-- 2. ROL SEÇİM EKRANI -->
+    <div class="card-container hidden" id="roleStep">
+        <h2 style="text-align: center;">Hoş Geldin! 👋</h2>
+        <p class="sub-title">Lütfen platformdaki rolünüzü seçin</p>
+
+        <button type="button" class="student-btn" onclick="startStudentFlow()">
+            🎓 Ben Öğrenciyim
+        </button>
+
+        <div class="divider">VEYA ÖĞRETMEN GİRİŞİ</div>
+
+        <form onsubmit="completeTeacherRegistration(event)">
+            <div class="input-group">
+                <label>Branşınız</label>
+                <div class="option-card"><input type="radio" name="branch" id="english" value="English Teacher" required><label for="english">🇬🇧 English Teacher</label></div>
+                <div class="option-card"><input type="radio" name="branch" id="turkish" value="Türkçe Öğretmeni"><label for="turkish">🇹🇷 Türkçe Öğretmeni</label></div>
+                <div class="option-card"><input type="radio" name="branch" id="german" value="Deutsch Lehrerin"><label for="german">🇩🇪 Deutsch Lehrerin</label></div>
+                <div class="option-card"><input type="radio" name="branch" id="coding" value="Kodlama Öğretmeni"><label for="coding">💻 Kodlama Öğretmeni</label></div>
+            </div>
+
+            <div class="input-group">
+                <label for="teacherCode">Öğretmen Güvenlik Şifresi</label>
+                <input type="password" id="teacherCode" placeholder="Teacher şifresi">
+            </div>
+
+            <button type="submit" class="btn-submit">Öğretmen Girişini Tamamla</button>
+        </form>
+    </div>
+
+    <!-- 3. ÖĞRENCİ SEVİYE / ŞUBE SEÇİM EKRANI -->
+    <div class="card-container hidden" id="studentStep">
+        <h2 style="text-align: center;">Öğrenci Bilgileri 🎓</h2>
+        <p class="sub-title">Sana özel içerikleri hazırlayabilmemiz için seviyeni seç</p>
+
+        <form onsubmit="completeStudentRegistration(event)">
+            <div class="input-group">
+                <label for="studentClass">Sınıfınız / Seviyeniz</label>
+                <select id="studentClass" required>
+                    <option value="">Seçiniz...</option>
+                    <option value="3. Sınıf">3. Sınıf</option>
+                    <option value="4. Sınıf">4. Sınıf</option>
+                    <option value="5. Sınıf">5. Sınıf</option>
+                    <option value="Lise Seviyesi">Lise (Zor Sorular)</option>
+                    <option value="Üniversite Seviyesi">Üniversite</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label for="studentBranch">Şubeniz (3A, 3B, 3C, 4A vb.)</label>
+                <input type="text" id="studentBranch" required placeholder="Örn: 3A veya 4B">
+            </div>
+
+            <button type="submit" class="btn-submit">Platforma Giriş Yap 🚀</button>
+        </form>
+    </div>
+
+    <!-- 4. ANA DERS EKRANI (DERS KARTLARI) -->
+    <div class="card-container dashboard-container hidden" id="dashboardStep">
+        <div class="welcome-header">
+            <div>
+                <h3 id="welcomeMsg" style="margin:0; text-align:left;"></h3>
+                <span id="badgeInfo" class="grade-badge"></span>
+            </div>
+            <button onclick="location.reload()" style="padding: 6px 12px; background:#e2e8f0; border:none; border-radius:6px; cursor:pointer;">Çıkış Yap</button>
+        </div>
+
+        <!-- ANA DERS LİSTESİ -->
+        <div id="subjectListArea">
+            <h3 style="text-align: left; margin-bottom: 15px;">Dersinizi Seçin</h3>
+            <div class="subject-grid">
+                <div class="subject-card" onclick="openSubjectDetail('Matematik')">
+                    <div class="subject-icon">📐</div>
+                    <div class="subject-title">Matematik</div>
+                </div>
+                <div class="subject-card" onclick="openSubjectDetail('Türkçe')">
+                    <div class="subject-icon">📚</div>
+                    <div class="subject-title">Türkçe</div>
+                </div>
+                <div class="subject-card" onclick="openSubjectDetail('Fen Bilimleri')">
+                    <div class="subject-icon">🔬</div>
+                    <div class="subject-title">Fen Bilimleri</div>
+                </div>
+                <div class="subject-card" onclick="openSubjectDetail('Hayat Bilgisi')">
+                    <div class="subject-icon">🌱</div>
+                    <div class="subject-title">Hayat Bilgisi</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEÇİLEN DERSİN 6 ÜNİTELİ DETAY ALANI -->
+        <div id="subjectDetailArea" class="hidden">
+            <button class="back-btn" onclick="goBackToSubjects()">⬅️ Derslere Geri Dön</button>
+            <h3 id="selectedSubjectTitle" style="text-align: left; color: var(--primary);"></h3>
+            <p style="color: #718096; font-size: 14px;">Çalışmak istediğiniz üniteye tıklayın:</p>
+
+            <!-- 6 Ünite Akordeon Listesi -->
+            <div class="unit-list" id="unitListContainer">
+                <!-- JavaScript ile 6 ünite dinamik yüklenecek -->
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let currentUser = {
+            name: '',
+            role: '',
+            level: '',
+            currentSubject: ''
+        };
+
+        // Rastgele Öğretici İçerik Veri Havuzu
+        const learningDatabase = {
+            "Matematik": [
+                { video: "Sayılar ve Basamak Değerleri Konu Anlatımı", work: "İnteraktif Basamak Tablosu Etkinliği", test: "Basamak Değeri Konu Tarama Testi (10 Soru)" },
+                { video: "Toplama ve Çıkarma İşlemlerinde Pratik Yollar", work: "Zihinden İki Basamaklı İşlem Çalışması", test: "Hızlı Hesaplama ve Problem Testi" },
+                { video: "Çarpım Tablosu ve Kolay Çarpma Yöntemleri", work: "Eğlenceli Çarpım Tablosu Eşleştirme Kartları", test: "Çarpma İşlemi Başarı Testi" },
+                { video: "Bölme İşlemi Mantığı ve Kalanlı Bölme", work: "Paylaştırma ve Gruplama Alıştırmaları", test: "Bölme Mantığı ve Problemler Testi" },
+                { video: "Kesirleri Anlama ve Şekille Gösterme", work: "Bütün, Yarım ve Çeyrek Model Çalışması", test: "Kesirler Konu Kavrama Testi" },
+                { video: "Geometrik Şekiller ve Çevre Hesaplama", work: "Kare, Dikdörtgen ve Üçgen Çevre Etkinliği", test: "Geometri ve Ölçme Tarama Testi" }
+            ],
+            "Türkçe": [
+                { video: "Okuduğunu Anlama ve Ana Fikir Bulma", work: "Örnek Hikaye Analizi ve Metin Soruları", test: "Okuduğunu Anlama Kavrama Testi" },
+                { video: "Eş Anlamlı ve Zıt Anlamlı Kelimeler", work: "Sözcük Avı ve Eşleştirme Çalışması", test: "Kelime Bilgisi Konu Tarama Testi" },
+                { video: "Noktalama İşaretleri ve Doğru Kullanım", work: "Eksik Noktalama İşaretlerini Tamamlama", test: "Noktalama İşaretleri Testi" },
+                { video: "Yazım Kuralları ve Sık Yapılan Hatalar", work: "Hatalı Kelimeleri Düzeltme Etkinliği", test: "Yazım Kuralları Tarama Testi" },
+                { video: "Cümle Bilgisi ve Kurallı Cümle Yapısı", work: "Karışık Kelimelerden Cümle Oluşturma", test: "Cümle Kurma ve Ögeler Testi" },
+                { video: "Metin Türleri ve Şiir İncelemesi", work: "Dize, Kıta ve Şiir Çözümleme Kartı", test: "Edebi Türler ve Şiir Testi" }
+            ],
+            "Fen Bilimleri": [
+                { video: "Dünyamızın Yapısı ve Katmanları", work: "Yer Kabuğu ve Katman Modeli Etkinliği", test: "Dünya ve Evren Konu Tarama Testi" },
+                { video: "Canlıların Dünyası ve Çeşitlilik", work: "Bitki ve Hayvan Türleri Sınıflandırma", test: "Canlılar ve Yaşam Kavrama Testi" },
+                { video: "Kuvvetin Cisimler Üzerindeki Etkileri", work: "İtme ve Çekme Kuvveti Deney Çalışması", test: "Kuvvet ve Hareket Testi" },
+                { video: "Maddenin Halleri ve Özellikleri", work: "Katı, Sıvı, Gaz Ayırt Etme Tablosu", test: "Madde ve Değişim Tarama Testi" },
+                { video: "Işık ve Ses Kaynakları", work: "Doğal ve Yapay Kaynakları Eşleştirme", test: "Işık ve Ses Teknolojileri Testi" },
+                { video: "Sağlıklı Yaşam ve Besin Grupları", work: "Dengeli Beslenme Tabağı Hazırlama", test: "Sağlık ve Beslenme Konu Testi" }
+            ],
+            "Hayat Bilgisi": [
+                { video: "Okulumuzda Hayat ve Kurallar", work: "Sınıf Kuralları ve Arkadaşlık Etkinliği", test: "Okul Yaşamı Konu Tarama Testi" },
+                { video: "Evimizde Hayat ve Sorumluluklarımız", work: "Aile İçi Görev Dağılımı Çalışması", test: "Ev ve Aile Yaşamı Testi" },
+                { video: "Sağlıklı Hayat ve Kişisel Bakım", work: "Günlük Kişisel Bakım Rutini Kartı", test: "Sağlık ve Temizlik Kavrama Testi" },
+                { video: "Güvenli Hayat ve Acil Durumlar", work: "Acil Numaralar ve Trafik Kuralları Çalışması", test: "Güvenli Yaşam Tarama Testi" },
+                { video: "Ülkemizde Hayat ve Kültürümüz", work: "Tarihi ve Turistik Yerler Eşleştirme", test: "Ülkemizi Tanıyalım Konu Testi" },
+                { video: "Doğada Hayat ve Çevreyi Koruma", work: "Geri Dönüşüm ve Doğa Sevgisi Etkinliği", test: "Doğa ve Çevre Bilinci Testi" }
+            ]
+        };
+
+        function goToBranchSelection(event) {
+            event.preventDefault();
+            if (!document.getElementById('robotCheck').checked) {
+                alert("Lütfen robot olmadığınızı doğrulayın!");
+                return;
+            }
+            currentUser.name = document.getElementById('username').value;
+            document.getElementById('loginStep').classList.add('hidden');
+            document.getElementById('roleStep').classList.remove('hidden');
+        }
+
+        function startStudentFlow() {
+            currentUser.role = 'Student';
+            document.getElementById('roleStep').classList.add('hidden');
+            document.getElementById('studentStep').classList.remove('hidden');
+        }
+
+        function completeStudentRegistration(event) {
+            event.preventDefault();
+            const selectedClass = document.getElementById('studentClass').value;
+            const selectedBranch = document.getElementById('studentBranch').value;
+            
+            currentUser.level = `${selectedClass} - Şube: ${selectedBranch}`;
+            showDashboard();
+        }
+
+        function completeTeacherRegistration(event) {
+            event.preventDefault();
+            const enteredCode = document.getElementById('teacherCode').value;
+            if (enteredCode !== "teacher§tap") {
+                alert("Hatalı öğretmen şifresi!");
+                return;
+            }
+            currentUser.role = 'Teacher';
+            currentUser.level = document.querySelector('input[name="branch"]:checked').value;
+            
+            showDashboard();
+        }
+
+        function showDashboard() {
+            document.getElementById('roleStep').classList.add('hidden');
+            document.getElementById('studentStep').classList.add('hidden');
+            document.getElementById('dashboardStep').classList.remove('hidden');
+
+            const welcomeMsg = document.getElementById('welcomeMsg');
+            if (currentUser.role === 'Teacher') {
+                welcomeMsg.innerText = `Hoş geldiniz ${currentUser.name} Bey 👋`;
+            } else {
+                welcomeMsg.innerText = `Hoş geldin ${currentUser.name}! 🚀`;
+            }
+
+            document.getElementById('badgeInfo').innerText = `Profil: ${currentUser.level}`;
+        }
+
+        function openSubjectDetail(subjectName) {
+            currentUser.currentSubject = subjectName;
+            document.getElementById('subjectListArea').classList.add('hidden');
+            document.getElementById('subjectDetailArea').classList.remove('hidden');
+            document.getElementById('selectedSubjectTitle').innerText = `${subjectName} Dersi (6 Ünite)`;
+
+            renderUnits(subjectName);
+        }
+
+        function renderUnits(subjectName) {
+            const container = document.getElementById('unitListContainer');
+            container.innerHTML = "";
+
+            const subjectData = learningDatabase[subjectName] || [];
+
+            for (let i = 1; i <= 6; i++) {
+                // Rastgele içerik seçimi
+                const contentIndex = (i - 1) % subjectData.length;
+                const unitData = subjectData[contentIndex];
+
+                const unitHtml = `
+                    <div class="unit-card">
+                        <div class="unit-header" onclick="toggleUnit(${i})">
+                            <span>📌 Ünite ${i}: ${subjectName} Öğretici İçerikleri</span>
+                            <span id="unitIcon-${i}">➕</span>
+                        </div>
+                        <div class="unit-body hidden" id="unitBody-${i}">
+                            <p style="margin-top:0; color:#4a5568;"><b>Zorluk Derecesi:</b> ${currentUser.level} seviyesine uyarlanmıştır.</p>
+
+                            <div class="resource-box">
+                                <div class="resource-title">📹 Öğretici Ünite Videosu</div>
+                                <div>${unitData.video}</div>
+                            </div>
+
+                            <div class="resource-box">
+                                <div class="resource-title">📝 Öğretici Ünite Çalışması</div>
+                                <div>${unitData.work}</div>
+                            </div>
+
+                            <div class="resource-box">
+                                <div class="resource-title">🎯 Konu Tarama Testi</div>
+                                <div>${unitData.test}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += unitHtml;
+            }
+        }
+
+        function toggleUnit(unitId) {
+            const body = document.getElementById(`unitBody-${unitId}`);
+            const icon = document.getElementById(`unitIcon-${unitId}`);
+
+            if (body.classList.contains('hidden')) {
+                body.classList.remove('hidden');
+                icon.innerText = "➖";
+            } else {
+                body.classList.add('hidden');
+                icon.innerText = "➕";
+            }
+        }
+
+        function goBackToSubjects() {
+            document.getElementById('subjectDetailArea').classList.add('hidden');
+            document.getElementById('subjectListArea').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
