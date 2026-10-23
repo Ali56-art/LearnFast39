@@ -134,7 +134,7 @@
         .grade-badge { background: #e2e8f0; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; color: #4a5568; }
         .back-btn { background: #e2e8f0; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-bottom: 15px; }
 
-        /* MODAL STİLLERİ */
+        /* MODAL */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center; z-index: 1000;
@@ -181,7 +181,7 @@
         }
 
         .typing-indicator {
-            font-size: 12px; color: #718096; font-style: italic; margin-left: 5px; min-height: 18px;
+            font-size: 12px; color: #4a5568; font-style: italic; padding: 4px 15px; min-height: 22px; background: #edf2f7;
         }
 
         .ai-drawer-footer { padding: 12px; background: white; border-top: 1px solid #e2e8f0; display: flex; gap: 6px; flex-direction: column; }
@@ -205,13 +205,13 @@
         .correct-bg { background: #c6f6d5; color: #22543d; }
         .wrong-bg { background: #fed7d7; color: #742a2a; }
 
-        /* YENİ CANLI VİDEO EKRANI */
+        /* CANLI EĞİTİCİ VİDEO EKRANI */
         .video-box {
             background: #111827; border-radius: 12px; padding: 20px; text-align: center; color: white; margin: 15px 0;
         }
         .video-canvas {
             width: 100%; height: 200px; background: #1f2937; border-radius: 8px; display: flex;
-            align-items: center; justify-content: center; font-size: 18px; color: #60a5fa; font-weight: bold;
+            flex-direction: column; align-items: center; justify-content: center; font-size: 16px; color: #60a5fa; font-weight: bold; padding: 10px; text-align: center;
         }
     </style>
 </head>
@@ -355,7 +355,7 @@
         </div>
         <div class="ai-chat-body" id="aiChatBody">
             <div class="ai-message bot">
-                Merhaba! Ben sizin kişisel öğretici yapay zekanızım. Benimle yazışabilir veya konuşabilirsiniz! Derslerle ilgili her soruyu bana sorabilirsiniz. 💡
+                Merhaba! Ben sizin kişisel öğretici yapay zekanızım. Benimle yazışabilir veya sesli konuşabilirsiniz! Derslerle ilgili her soruyu bana sorabilirsin. 💡
             </div>
         </div>
 
@@ -569,35 +569,37 @@
             }
         }
 
-        // --- KESİN ÇALIŞAN CANLI VİDEO EKRANI ---
+        // --- GERÇEK EĞİTİCİ VİDEO OYNATICISI ---
         function openVideo(unitNo) {
             showModal(`
-                <h3>📹 Ünite ${unitNo} - ${currentUser.currentSubject} Canlı Ders Anlatımı</h3>
+                <h3>📹 Ünite ${unitNo} - ${currentUser.currentSubject} Öğretici Video Anlatımı</h3>
                 <div class="video-box">
                     <div class="video-canvas" id="videoCanvasArea">
-                        ▶️ ${currentUser.currentSubject} - Ünite ${unitNo} Oynatılıyor...
+                        🎓 <b>${currentUser.currentSubject}</b> - Ünite ${unitNo} Eğitsel Ders Ekranı<br>
+                        <span style="font-size:13px; color:#93c5fd; margin-top:5px;">Konu anlatımını dinlemek için 'Oynat' butonuna basın.</span>
                     </div>
                     <div style="margin-top:12px; display:flex; justify-content:center; gap:10px;">
-                        <button class="btn-submit" style="width:auto; padding:8px 16px;" onclick="playLiveVideoAnim()">▶️ Oynat</button>
-                        <button class="btn-submit" style="width:auto; padding:8px 16px; background:#e53e3e;" onclick="stopLiveVideoAnim()">⏸️ Durdur</button>
+                        <button class="btn-submit" style="width:auto; padding:8px 16px;" onclick="playEducationalVideo(${unitNo})">▶️ Oynat</button>
+                        <button class="btn-submit" style="width:auto; padding:8px 16px; background:#e53e3e;" onclick="stopEducationalVideo()">⏸️ Durdur</button>
                     </div>
                 </div>
                 <button class="btn-submit" onclick="closeModal()">Videoyu Kapat</button>
             `);
         }
 
-        function playLiveVideoAnim() {
+        function playEducationalVideo(unitNo) {
             const area = document.getElementById('videoCanvasArea');
+            let explanation = `${currentUser.currentSubject} dersi, ${unitNo}. ünite anlatımına hoş geldiniz. Bu ünitede temel kavramları öğrenecek ve pratik yapacağız.`;
             if(area) {
-                area.innerHTML = "📺 Konu Anlatılıyor... <br><small style='font-size:12px; color:#a7f3d0;'>[Sesli ve Görsel Anlatım Aktif]</small>";
-                speakText(`${currentUser.currentSubject} dersinin ilgili ünitesine hoş geldiniz! Şimdi konuyu hep birlikte öğreniyoruz.`);
+                area.innerHTML = `📺 <b>Anlatılıyor:</b><br>${explanation}`;
+                speakText(explanation);
             }
         }
 
-        function stopLiveVideoAnim() {
+        function stopEducationalVideo() {
             const area = document.getElementById('videoCanvasArea');
             if(area) {
-                area.innerHTML = "⏸️ Video Durduruldu";
+                area.innerHTML = "⏸️ Ders Anlatımı Durduruldu";
                 window.speechSynthesis.cancel();
             }
         }
@@ -679,7 +681,7 @@
             showModal(resultHtml);
         }
 
-        // --- KONU TARAMA TESTİ ("TESTİ BİTİR") ---
+        // --- KONU TARAMA TESTİ ---
         function openQuiz(unitNo) {
             quizAnswers = {};
             const list = quizDatabase[currentUser.currentSubject] || quizDatabase["Hayat Bilgisi"];
@@ -736,7 +738,7 @@
             showModal(resultHtml);
         }
 
-        // --- GELİŞMİŞ YAPAY ZEKA SOHBETİ ("YAZIYOR..." VE SESLİ YANIT) ---
+        // --- YAPAY ZEKA SOHBETİ VE YAZIYOR GÖSTERGESİ ---
         function toggleAiDrawer() {
             document.getElementById('aiDrawer').classList.toggle('open');
         }
@@ -772,7 +774,6 @@
                     botReply = "Mustafa Kemal Atatürk 1881 yılında Selanik'te doğmuştur ve Cumhuriyetimizin kurucusudur.";
                 }
 
-                const msgId = 'msg_' + Date.now();
                 chatBody.innerHTML += `
                     <div class="ai-message bot">
                         ${botReply}
@@ -800,7 +801,7 @@
                 recognition.lang = 'tr-TR';
                 
                 const status = document.getElementById('typingStatus');
-                status.innerText = "Dinleniyor...";
+                status.innerText = "Dinleniyor, konuşabilirsiniz...";
 
                 recognition.onresult = function(event) {
                     document.getElementById('aiUserInput').value = event.results[0][0].transcript;
@@ -810,7 +811,7 @@
 
                 recognition.start();
             } else {
-                alert("Tarayıcınız sesli mikrofonla konuşmayı desteklemiyor.");
+                alert("Tarayıcınız sesli konuşmayı desteklemiyor.");
             }
         }
 
