@@ -168,24 +168,10 @@
             box-shadow: 0 8px 20px rgba(102, 126, 234, 0.15);
         }
 
-        .subject-icon {
-            font-size: 38px;
-            margin-bottom: 10px;
-        }
+        .subject-icon { font-size: 38px; margin-bottom: 10px; }
+        .subject-title { font-size: 18px; color: #2d3748; font-weight: bold; }
 
-        .subject-title {
-            font-size: 18px;
-            color: #2d3748;
-            font-weight: bold;
-        }
-
-        /* 6 ÜNİTE AKORDEON TİPİ LİSTE */
-        .unit-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-top: 15px;
-        }
+        .unit-list { display: flex; flex-direction: column; gap: 12px; margin-top: 15px; }
 
         .unit-card {
             border: 2px solid #e2e8f0;
@@ -204,36 +190,25 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: background 0.2s;
         }
 
-        .unit-header:hover {
-            background: #edf2f7;
-            color: var(--primary);
-        }
+        .unit-body { padding: 20px; background: #faf5ff; border-top: 1px dashed #cbd5e0; }
 
-        .unit-body {
-            padding: 20px;
-            background: #faf5ff;
-            border-top: 1px dashed #cbd5e0;
-        }
-
-        .resource-box {
+        .action-btn {
             background: white;
-            border: 1px solid #e2e8f0;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 12px;
             border-radius: 8px;
-            padding: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
             margin-bottom: 10px;
+            text-align: left;
+            transition: all 0.2s;
         }
 
-        .resource-title {
-            font-weight: bold;
-            color: var(--primary);
-            margin-bottom: 6px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+        .action-btn:hover { background: var(--primary); color: white; }
 
         .grade-badge {
             background: #e2e8f0;
@@ -252,6 +227,40 @@
             cursor: pointer;
             font-weight: bold;
             margin-bottom: 15px;
+        }
+
+        /* MODAL STİLLERİ */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex; justifyContent: center; align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .quiz-option {
+            background: #f7fafc;
+            border: 1px solid #cbd5e0;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+
+        .quiz-option.selected {
+            background: #667eea;
+            color: white;
+            border-color: #5a6fd6;
         }
     </style>
 </head>
@@ -343,7 +352,7 @@
         </form>
     </div>
 
-    <!-- 4. ANA DERS EKRANI (DERS KARTLARI) -->
+    <!-- 4. ANA DERS EKRANI -->
     <div class="card-container dashboard-container hidden" id="dashboardStep">
         <div class="welcome-header">
             <div>
@@ -353,7 +362,6 @@
             <button onclick="location.reload()" style="padding: 6px 12px; background:#e2e8f0; border:none; border-radius:6px; cursor:pointer;">Çıkış Yap</button>
         </div>
 
-        <!-- ANA DERS LİSTESİ -->
         <div id="subjectListArea">
             <h3 style="text-align: left; margin-bottom: 15px;">Dersinizi Seçin</h3>
             <div class="subject-grid">
@@ -382,57 +390,30 @@
             <h3 id="selectedSubjectTitle" style="text-align: left; color: var(--primary);"></h3>
             <p style="color: #718096; font-size: 14px;">Çalışmak istediğiniz üniteye tıklayın:</p>
 
-            <!-- 6 Ünite Akordeon Listesi -->
-            <div class="unit-list" id="unitListContainer">
-                <!-- JavaScript ile 6 ünite dinamik yüklenecek -->
-            </div>
+            <div class="unit-list" id="unitListContainer"></div>
         </div>
+    </div>
 
+    <!-- AÇILIR İÇERİK MODALI -->
+    <div id="contentModal" class="modal-overlay hidden">
+        <div class="modal-content" id="modalBox"></div>
     </div>
 
     <script>
-        let currentUser = {
-            name: '',
-            role: '',
-            level: '',
-            currentSubject: ''
-        };
+        let currentUser = { name: '', role: '', level: '', currentSubject: '' };
+        let quizAnswers = {};
 
-        // Rastgele Öğretici İçerik Veri Havuzu
-        const learningDatabase = {
-            "Matematik": [
-                { video: "Sayılar ve Basamak Değerleri Konu Anlatımı", work: "İnteraktif Basamak Tablosu Etkinliği", test: "Basamak Değeri Konu Tarama Testi (10 Soru)" },
-                { video: "Toplama ve Çıkarma İşlemlerinde Pratik Yollar", work: "Zihinden İki Basamaklı İşlem Çalışması", test: "Hızlı Hesaplama ve Problem Testi" },
-                { video: "Çarpım Tablosu ve Kolay Çarpma Yöntemleri", work: "Eğlenceli Çarpım Tablosu Eşleştirme Kartları", test: "Çarpma İşlemi Başarı Testi" },
-                { video: "Bölme İşlemi Mantığı ve Kalanlı Bölme", work: "Paylaştırma ve Gruplama Alıştırmaları", test: "Bölme Mantığı ve Problemler Testi" },
-                { video: "Kesirleri Anlama ve Şekille Gösterme", work: "Bütün, Yarım ve Çeyrek Model Çalışması", test: "Kesirler Konu Kavrama Testi" },
-                { video: "Geometrik Şekiller ve Çevre Hesaplama", work: "Kare, Dikdörtgen ve Üçgen Çevre Etkinliği", test: "Geometri ve Ölçme Tarama Testi" }
-            ],
-            "Türkçe": [
-                { video: "Okuduğunu Anlama ve Ana Fikir Bulma", work: "Örnek Hikaye Analizi ve Metin Soruları", test: "Okuduğunu Anlama Kavrama Testi" },
-                { video: "Eş Anlamlı ve Zıt Anlamlı Kelimeler", work: "Sözcük Avı ve Eşleştirme Çalışması", test: "Kelime Bilgisi Konu Tarama Testi" },
-                { video: "Noktalama İşaretleri ve Doğru Kullanım", work: "Eksik Noktalama İşaretlerini Tamamlama", test: "Noktalama İşaretleri Testi" },
-                { video: "Yazım Kuralları ve Sık Yapılan Hatalar", work: "Hatalı Kelimeleri Düzeltme Etkinliği", test: "Yazım Kuralları Tarama Testi" },
-                { video: "Cümle Bilgisi ve Kurallı Cümle Yapısı", work: "Karışık Kelimelerden Cümle Oluşturma", test: "Cümle Kurma ve Ögeler Testi" },
-                { video: "Metin Türleri ve Şiir İncelemesi", work: "Dize, Kıta ve Şiir Çözümleme Kartı", test: "Edebi Türler ve Şiir Testi" }
-            ],
-            "Fen Bilimleri": [
-                { video: "Dünyamızın Yapısı ve Katmanları", work: "Yer Kabuğu ve Katman Modeli Etkinliği", test: "Dünya ve Evren Konu Tarama Testi" },
-                { video: "Canlıların Dünyası ve Çeşitlilik", work: "Bitki ve Hayvan Türleri Sınıflandırma", test: "Canlılar ve Yaşam Kavrama Testi" },
-                { video: "Kuvvetin Cisimler Üzerindeki Etkileri", work: "İtme ve Çekme Kuvveti Deney Çalışması", test: "Kuvvet ve Hareket Testi" },
-                { video: "Maddenin Halleri ve Özellikleri", work: "Katı, Sıvı, Gaz Ayırt Etme Tablosu", test: "Madde ve Değişim Tarama Testi" },
-                { video: "Işık ve Ses Kaynakları", work: "Doğal ve Yapay Kaynakları Eşleştirme", test: "Işık ve Ses Teknolojileri Testi" },
-                { video: "Sağlıklı Yaşam ve Besin Grupları", work: "Dengeli Beslenme Tabağı Hazırlama", test: "Sağlık ve Beslenme Konu Testi" }
-            ],
-            "Hayat Bilgisi": [
-                { video: "Okulumuzda Hayat ve Kurallar", work: "Sınıf Kuralları ve Arkadaşlık Etkinliği", test: "Okul Yaşamı Konu Tarama Testi" },
-                { video: "Evimizde Hayat ve Sorumluluklarımız", work: "Aile İçi Görev Dağılımı Çalışması", test: "Ev ve Aile Yaşamı Testi" },
-                { video: "Sağlıklı Hayat ve Kişisel Bakım", work: "Günlük Kişisel Bakım Rutini Kartı", test: "Sağlık ve Temizlik Kavrama Testi" },
-                { video: "Güvenli Hayat ve Acil Durumlar", work: "Acil Numaralar ve Trafik Kuralları Çalışması", test: "Güvenli Yaşam Tarama Testi" },
-                { video: "Ülkemizde Hayat ve Kültürümüz", work: "Tarihi ve Turistik Yerler Eşleştirme", test: "Ülkemizi Tanıyalım Konu Testi" },
-                { video: "Doğada Hayat ve Çevreyi Koruma", work: "Geri Dönüşüm ve Doğa Sevgisi Etkinliği", test: "Doğa ve Çevre Bilinci Testi" }
-            ]
-        };
+        const videoPool = [
+            "🎥 Öğretici Konu Anlatım Videosu: Temel Kavramlar ve Örnek Çözümler",
+            "🎥 Hızlı Öğrenme Modülü: Animasyonlu Konu Özet Anlatımı",
+            "🎥 Çözümlü Soru Videosu: Sık Yapılan Hatalar ve İpuçları"
+        ];
+
+        const workPool = [
+            "📝 İnteraktif Öğretici Çalışma Notları ve Kavram Haritası",
+            "📝 Boşluk Doldurma ve Eşleştirme Alıştırmaları",
+            "📝 Özet Ders Notu ve Uygulamalı Etkinlik Kağıdı"
+        ];
 
         function goToBranchSelection(event) {
             event.preventDefault();
@@ -455,21 +436,18 @@
             event.preventDefault();
             const selectedClass = document.getElementById('studentClass').value;
             const selectedBranch = document.getElementById('studentBranch').value;
-            
             currentUser.level = `${selectedClass} - Şube: ${selectedBranch}`;
             showDashboard();
         }
 
         function completeTeacherRegistration(event) {
             event.preventDefault();
-            const enteredCode = document.getElementById('teacherCode').value;
-            if (enteredCode !== "teacher§tap") {
+            if (document.getElementById('teacherCode').value !== "teacher§tap") {
                 alert("Hatalı öğretmen şifresi!");
                 return;
             }
             currentUser.role = 'Teacher';
             currentUser.level = document.querySelector('input[name="branch"]:checked').value;
-            
             showDashboard();
         }
 
@@ -501,36 +479,17 @@
             const container = document.getElementById('unitListContainer');
             container.innerHTML = "";
 
-            const subjectData = learningDatabase[subjectName] || [];
-
             for (let i = 1; i <= 6; i++) {
-                // Rastgele içerik seçimi
-                const contentIndex = (i - 1) % subjectData.length;
-                const unitData = subjectData[contentIndex];
-
                 const unitHtml = `
                     <div class="unit-card">
                         <div class="unit-header" onclick="toggleUnit(${i})">
-                            <span>📌 Ünite ${i}: ${subjectName} Öğretici İçerikleri</span>
+                            <span>📌 Ünite ${i}: ${subjectName}</span>
                             <span id="unitIcon-${i}">➕</span>
                         </div>
                         <div class="unit-body hidden" id="unitBody-${i}">
-                            <p style="margin-top:0; color:#4a5568;"><b>Zorluk Derecesi:</b> ${currentUser.level} seviyesine uyarlanmıştır.</p>
-
-                            <div class="resource-box">
-                                <div class="resource-title">📹 Öğretici Ünite Videosu</div>
-                                <div>${unitData.video}</div>
-                            </div>
-
-                            <div class="resource-box">
-                                <div class="resource-title">📝 Öğretici Ünite Çalışması</div>
-                                <div>${unitData.work}</div>
-                            </div>
-
-                            <div class="resource-box">
-                                <div class="resource-title">🎯 Konu Tarama Testi</div>
-                                <div>${unitData.test}</div>
-                            </div>
+                            <button class="action-btn" onclick="openVideo(${i})">📹 Ünite Videosu (Öğretici)</button>
+                            <button class="action-btn" onclick="openWork(${i})">📝 Ünite Çalışması (Öğretici)</button>
+                            <button class="action-btn" onclick="openQuiz(${i})">🎯 Konu Tarama Testi (10 Soru)</button>
                         </div>
                     </div>
                 `;
@@ -541,7 +500,6 @@
         function toggleUnit(unitId) {
             const body = document.getElementById(`unitBody-${unitId}`);
             const icon = document.getElementById(`unitIcon-${unitId}`);
-
             if (body.classList.contains('hidden')) {
                 body.classList.remove('hidden');
                 icon.innerText = "➖";
@@ -549,6 +507,79 @@
                 body.classList.add('hidden');
                 icon.innerText = "➕";
             }
+        }
+
+        function openVideo(unitNo) {
+            const randomVideo = videoPool[Math.floor(Math.random() * videoPool.length)];
+            showModal(`
+                <h3>📹 Ünite ${unitNo} - Öğretici Video</h3>
+                <p><b>Ders:</b> ${currentUser.currentSubject}</p>
+                <div style="background:#000; color:#fff; padding:40px; text-align:center; border-radius:8px; margin:15px 0;">
+                    ▶️ ${randomVideo}<br><small>(Video Oynatılıyor...)</small>
+                </div>
+                <button class="btn-submit" onclick="closeModal()">Kapat</button>
+            `);
+        }
+
+        function openWork(unitNo) {
+            const randomWork = workPool[Math.floor(Math.random() * workPool.length)];
+            showModal(`
+                <h3>📝 Ünite ${unitNo} - Öğretici Çalışma</h3>
+                <p><b>Ders:</b> ${currentUser.currentSubject}</p>
+                <div style="background:#edf2f7; padding:20px; border-radius:8px; margin:15px 0;">
+                    📌 <b>Çalışma İçeriği:</b><br>${randomWork}
+                </div>
+                <button class="btn-submit" onclick="closeModal()">Çalışmayı Tamamla</button>
+            `);
+        }
+
+        function openQuiz(unitNo) {
+            quizAnswers = {};
+            let questionsHtml = `<h3>🎯 Ünite ${unitNo} - Konu Tarama Testi</h3><p>Toplam 10 soru bulunmaktadır. Lütfen hepsini yanıtlayın.</p>`;
+
+            for (let q = 1; q <= 10; q++) {
+                questionsHtml += `
+                    <div style="margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:10px;">
+                        <b>Soru ${q}:</b> ${currentUser.currentSubject} Ünite ${unitNo} ile ilgili ${q}. öğrenme sorusu?
+                        <div class="quiz-option" id="q_${q}_A" onclick="selectAnswer(${q}, 'A')">A) Seçenek 1</div>
+                        <div class="quiz-option" id="q_${q}_B" onclick="selectAnswer(${q}, 'B')">B) Seçenek 2</div>
+                    </div>
+                `;
+            }
+
+            questionsHtml += `<button class="btn-submit" onclick="finishQuiz()">Dersi Bitir</button>`;
+            showModal(questionsHtml);
+        }
+
+        function selectAnswer(qNum, option) {
+            quizAnswers[qNum] = option;
+            ['A', 'B'].forEach(opt => {
+                const el = document.getElementById(`q_${qNum}_${opt}`);
+                if (el) el.classList.remove('selected');
+            });
+            document.getElementById(`q_${qNum}_${option}`).classList.add('selected');
+        }
+
+        function finishQuiz() {
+            const answeredCount = Object.keys(quizAnswers).length;
+            
+            // İstediğin Güncellenmiş Uyarı
+            if (answeredCount < 10) {
+                alert("Lütfen tüm soruları cevaplayın.");
+                return;
+            }
+
+            alert(`🎉 Tebrikler ${currentUser.name}! 10 sorunun tamamını başarıyla tamamladınız. Dersi bitirdiniz!`);
+            closeModal();
+        }
+
+        function showModal(content) {
+            document.getElementById('modalBox').innerHTML = content;
+            document.getElementById('contentModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('contentModal').classList.add('hidden');
         }
 
         function goBackToSubjects() {
