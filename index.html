@@ -83,7 +83,7 @@
             align-items: center; gap: 12px; cursor: pointer; background: #f7fafc;
         }
 
-        /* ------------------ DASHBOARD ------------------ */
+        /* DASHBOARD */
         .welcome-header {
             background: #edf2f7; padding: 20px; border-radius: 12px;
             margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center;
@@ -158,6 +158,45 @@
         .result-box { padding: 10px; border-radius: 6px; margin-bottom: 8px; font-weight: bold; }
         .correct-bg { background: #c6f6d5; color: #22543d; }
         .wrong-bg { background: #fed7d7; color: #742a2a; }
+
+        /* VİDEO EKRANI TASARIMI */
+        .video-player-container {
+            background: #1a202c;
+            border-radius: 12px;
+            padding: 20px;
+            color: white;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        .video-screen {
+            background: linear-gradient(45deg, #2d3748, #4a5568);
+            border-radius: 8px;
+            padding: 30px 15px;
+            min-height: 140px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            border: 2px solid #667eea;
+        }
+        .video-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        .video-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .video-btn:hover { background: #5a6fd6; }
     </style>
 </head>
 <body>
@@ -280,7 +319,6 @@
             </div>
         </div>
 
-        <!-- SEÇİLEN DERSİN 6 ÜNİTELİ DETAY ALANI -->
         <div id="subjectDetailArea" class="hidden">
             <button class="back-btn" onclick="goBackToSubjects()">⬅️ Derslere Geri Dön</button>
             <h3 id="selectedSubjectTitle" style="text-align: left; color: var(--primary);"></h3>
@@ -301,8 +339,17 @@
         let workStep = 1;
         let workAnswers = [];
         let draggedText = '';
+        let isVideoPlaying = false;
+        let speechSynth = window.speechSynthesis;
 
-        // DERSE ÖZEL KONU TARAMA TESTİ SORU HAVUZLARI (10 SORU)
+        // DERSE ÖZEL VİDEO DERS ANLATIM YAZILARI
+        const videoSpeechDatabase = {
+            "Hayat Bilgisi": "Sevgili öğrenciler, Hayat Bilgisi dersimize hoş geldiniz. Bu ünitede okul kurallarını, Atatürk'ün hayatını ve doğayı koruma yollarını öğreniyoruz.",
+            "Matematik": "Merhaba çocuklar! Matematik dersinde bugün toplama, çıkarma, zihinden hesaplama ve geometrik şekilleri eğlenceli bir şekilde keşfediyoruz.",
+            "Türkçe": "Hoş geldiniz! Türkçe dersinde okuduğumuzu anlama, eş ve zıt anlamlı kelimeler ile yazım kurallarını öğreneceğiz.",
+            "Fen Bilimleri": "Aramıza hoş geldiniz! Fen Bilimleri dersinde maddenin hallerini, canlıların dünyasını ve dünyamızın katmanlarını inceliyoruz."
+        };
+
         const quizDatabase = {
             "Hayat Bilgisi": [
                 { q: "Mustafa Kemal Atatürk hangi yılda doğmuştur?", options: ["A) 1881", "B) 1919", "C) 1923"], ans: "A" },
@@ -354,7 +401,6 @@
             ]
         };
 
-        // ÜNİTE ÇALIŞMALARI (SÜRÜKLEMELİ 5 SORU)
         const workDatabase = {
             "Hayat Bilgisi": [
                 { q: "Atatürk hangi yılda doğmuştur?", correct: "1881", options: ["1881", "1919", "1923"] },
@@ -455,7 +501,7 @@
                             <span id="unitIcon-${i}">➕</span>
                         </div>
                         <div class="unit-body hidden" id="unitBody-${i}">
-                            <button class="action-btn" onclick="openVideo(${i})">📹 Ünite Videosu (Öğretici)</button>
+                            <button class="action-btn" onclick="openVideo(${i})">📹 Ünite Videosu (Canlı Ders Anlatımı)</button>
                             <button class="action-btn" onclick="startWork(${i})">📝 Ünite Çalışması (Sürüklemeli 5 Soru)</button>
                             <button class="action-btn" onclick="openQuiz(${i})">🎯 Konu Tarama Testi (10 Soru)</button>
                         </div>
@@ -476,22 +522,66 @@
             }
         }
 
-        // 1. OYNATILABİLİR GERÇEK VİDEO MODALI
+        // --- ENTEGRE VE İNTERAKTİF YENİ VİDEO OYNATICI ---
         function openVideo(unitNo) {
+            const speechText = videoSpeechDatabase[currentUser.currentSubject] || videoSpeechDatabase["Hayat Bilgisi"];
+            
             showModal(`
-                <h3>📹 Ünite ${unitNo} - ${currentUser.currentSubject} Öğretici Videosu</h3>
-                <p>Aşağıdaki videoyu oynatarak konuyu anlatımlı izleyebilirsiniz:</p>
-                <div style="text-align:center; margin:15px 0;">
-                    <video width="100%" controls style="border-radius:8px; max-height:240px; background:#000;">
-                        <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" type="video/mp4">
-                        Tarayıcınız video oynatmayı desteklemiyor.
-                    </video>
+                <h3>📹 Ünite ${unitNo} - ${currentUser.currentSubject} Ders Anlatımı</h3>
+                <div class="video-player-container">
+                    <div class="video-screen">
+                        <div id="videoAnimIcon" style="font-size:45px; margin-bottom:10px;">🎓</div>
+                        <div id="videoStatusText" style="font-size:18px; font-weight:bold; color:#667eea;">Ders Videosu Hazır</div>
+                        <div style="font-size:13px; color:#cbd5e0; margin-top:8px;" id="videoSubText">Oynat butonuna basarak sesli konu anlatımını başlatabilirsiniz.</div>
+                    </div>
+                    <div class="video-controls">
+                        <button class="video-btn" onclick="playVideoSpeech('${speechText}')">▶️ Oynat</button>
+                        <button class="video-btn" style="background:#e53e3e;" onclick="stopVideoSpeech()">⏸️ Durdur</button>
+                    </div>
                 </div>
-                <button class="btn-submit" onclick="closeModal()">Videoyu Tamamla</button>
+                <button class="btn-submit" style="margin-top:20px;" onclick="closeVideoModal()">Videoyu Kapat</button>
             `);
         }
 
-        // 2. SÜRÜKLE-BIRAK ÜNİTE ÇALIŞMALARI (5 SORU)
+        function playVideoSpeech(text) {
+            stopVideoSpeech();
+            
+            document.getElementById('videoStatusText').innerText = "🔊 Ders Anlatılıyor...";
+            document.getElementById('videoStatusText').style.color = "#48bb78";
+            document.getElementById('videoSubText').innerText = text;
+            document.getElementById('videoAnimIcon').innerText = "📺⚡";
+
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'tr-TR';
+                utterance.rate = 0.9;
+                utterance.onend = function() {
+                    document.getElementById('videoStatusText').innerText = "✅ Video Tamamlandı";
+                    document.getElementById('videoStatusText').style.color = "#4299e1";
+                    document.getElementById('videoAnimIcon').innerText = "🎉";
+                };
+                speechSynth.speak(utterance);
+            }
+        }
+
+        function stopVideoSpeech() {
+            if ('speechSynthesis' in window) {
+                speechSynth.cancel();
+            }
+            const status = document.getElementById('videoStatusText');
+            if(status) {
+                status.innerText = "⏸️ Durduruldu";
+                status.style.color = "#ecc94b";
+                document.getElementById('videoAnimIcon').innerText = "🎓";
+            }
+        }
+
+        function closeVideoModal() {
+            stopVideoSpeech();
+            closeModal();
+        }
+
+        // --- SÜRÜKLE-BIRAK ÜNİTE ÇALIŞMALARI ---
         function startWork(unitNo) {
             workStep = 1;
             workAnswers = [];
@@ -569,7 +659,7 @@
             showModal(resultHtml);
         }
 
-        // 3. GERÇEK SORULU KONU TARAMA TESTİ (10 SORU)
+        // --- KONU TARAMA TESTİ ---
         function openQuiz(unitNo) {
             quizAnswers = {};
             const list = quizDatabase[currentUser.currentSubject] || quizDatabase["Hayat Bilgisi"];
