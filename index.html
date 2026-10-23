@@ -205,13 +205,13 @@
         .correct-bg { background: #c6f6d5; color: #22543d; }
         .wrong-bg { background: #fed7d7; color: #742a2a; }
 
-        /* UNITY YAZI OKUMA */
+        /* UNITY YAZI OKUMA PANELİ */
         .unity-reader-box {
             background: #1e1b4b; border-radius: 12px; padding: 20px; color: white; text-align: center; margin: 15px 0;
             border: 2px solid #818cf8;
         }
         .unity-screen {
-            background: #312e81; border-radius: 8px; padding: 20px; min-height: 120px;
+            background: #312e81; border-radius: 8px; padding: 20px; min-height: 140px;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             font-size: 16px; color: #e0e7ff; line-height: 1.5; margin-bottom: 15px;
         }
@@ -399,34 +399,43 @@
             }
         };
 
+        // 1'den 7'ye KADAR SIRALI UNITY YAZI OKUMA METİNLERİ
         const unityReadDatabase = {
             "Hayat Bilgisi": [
-                "1. Yazı: Okulumuzda ve sınıfımızda uymamız gereken kurallar vardır. Bu kurallar güvenliğimizi sağlar.",
+                "1. Yazı: Okulumuzda ve sınıfımızda uymamız gereken kurallar vardır. Bu kurallar düzenimizi sağlar.",
                 "2. Yazı: Evimizde ailemize destek olmak için bazı sorumluluklar üstleniriz.",
-                "3. Yazı: Sağlığımızı korumak için dengeli beslenmeli ve kişisel temizliğimize dikkat etmeliyiz.",
-                "4. Yazı: Trafikte güvenle yürümek için yayalar için belirlenen kurallara mutlaka uymalıyız.",
-                "5. Yazı: Ülkemizin tarihi değerlerini, doğamızı ve çevremizi korumak hepimizin görevidir."
+                "3. Yazı: Sağlığımızı korumak için dengeli beslenmeli ve kişisel temizliğimize önem vermeliyiz.",
+                "4. Yazı: Trafikte güvenle yürümek için yayalar için belirlenen kurallara dikkat etmeliyiz.",
+                "5. Yazı: Ülkemizin tarihi değerlerini, doğamızı ve çevremizi korumak hepimizin görevidir.",
+                "6. Yazı: Acil durumlarda 112 numaralı telefonu arayarak yardım isteyebiliriz.",
+                "7. Yazı: Cumhuriyetimizin kurucusu Mustafa Kemal Atatürk'ün hayatını ve başarılarını öğrenmeliyiz."
             ],
             "Matematik": [
                 "1. Yazı: Sayılar ve basamak değerleri, matematikte temel hesaplamaları yapmamızı sağlar.",
-                "2. Yazı: Toplama ve çıkarma işlemleri günlük hayatta en çok kullandığımız pratik becerilerdir.",
-                "3. Yazı: Çarpım tablosunu bilmek, büyük sayıları hızlıca çarpmamıza ve bölmemize yardımcı olur.",
-                "4. Yazı: Kesirler bir bütünün parçalarını ifade eder; bütün, yarım ve çeyrek günlük hayatımızın içindedir.",
-                "5. Yazı: Geometrik şekillerin çevre ve alan hesaplamaları etrafımızdaki yapıları anlamamızı sağlar."
+                "2. Yazı: Toplama ve çıkarma işlemleri günlük hayatta en çok kullandığımız temel işlemlerdir.",
+                "3. Yazı: Çarpım tablosunu zihinden bilmek, büyük sayıları hızlıca çarpmamıza ve bölmemize yardım eder.",
+                "4. Yazı: Kesirler bir bütünün parçalarını ifade eder; bütün, yarım ve çeyrek buna örnektir.",
+                "5. Yazı: Geometrik şekillerin çevre ve alan hesaplamaları etrafımızdaki yapıları ölçmemize yarar.",
+                "6. Yazı: Zamanı ölçmek için saat, gün, hafta ve ay gibi temel birimleri kullanırız.",
+                "7. Yazı: Problem çözerken verileri dikkatlice okumalı ve hangi işlemi yapacağımıza karar vermeliyiz."
             ],
             "Türkçe": [
-                "1. Yazı: Okuduğumuz metinlerde ana düşünceyi ve ana fikri bulmak anlama becerimizi geliştirir.",
+                "1. Yazı: Okuduğumuz metinlerde ana düşünceyi bulmak anlama becerimizi geliştirir.",
                 "2. Yazı: Eş anlamlı kelimeler yazılışları farklı ama anlamları aynı olan sözcüklerdir.",
                 "3. Yazı: Cümlelerde anlam bütünlüğünü sağlamak için noktalama işaretlerini doğru yerlerde kullanmalıyız.",
-                "4. Yazı: Yazım kurallarına uymak yazdığımız metinlerin okunabilirliğini ve anlaşılırlığını artırır.",
-                "5. Yazı: Şiir ve hikaye gibi edebi metinler hayal gücümüzü zenginleştirir."
+                "4. Yazı: Yazım kurallarına uymak yazdığımız metinlerin anlaşılırlığını artırır.",
+                "5. Yazı: Şiir ve hikaye gibi edebi metinler hayal gücümüzü ve kelime haznemizi zenginleştirir.",
+                "6. Yazı: Zıt anlamlı kelimeler birbirinin tamamen karşıtı anlam taşıyan sözcüklerdir.",
+                "7. Yazı: Kurallı cümlelerde eylem genellikle cümlenin en sonunda yer alır."
             ],
             "Fen Bilimleri": [
-                "1. Yazı: Dünyamızın katmanları vardır; bunlardan üzerinde yaşadığımız yer kabuğu canlılara ev sahipliği yapar.",
-                "2. Yazı: Canlılar dünyası bitkiler ve hayvanlar olmak üzere çeşitlilik gösterir.",
-                "3. Yazı: Kuvvet cisimlerin hareket yönünü değiştirebilir, onları hızlandırabilir veya yavaşlatabilir.",
+                "1. Yazı: Dünyamızın katmanları vardır; uzerinde yaşadığımız yer kabuğu canlılara ev sahipliği yapar.",
+                "2. Yazı: Canlılar dünyası bitkiler ve hayvanlar olmak üzere büyük bir çeşitlilik gösterir.",
+                "3. Yazı: Kuvvet cisimlerin hareket yönünü değiştirebilir, onları hızlandırabilir veya durdurabilir.",
                 "4. Yazı: Maddenin katı, sıvı ve gaz olmak üzere üç temel hali bulunur.",
-                "5. Yazı: Işık ve ses kaynakları etrafımızı algılamamızı sağlayan en önemli doğa olaylarındandır."
+                "5. Yazı: Işık ve ses kaynakları çevremizi algılamamızı sağlayan doğa olaylarındandır.",
+                "6. Yazı: Mıknatıslar demir, nikel ve kobalt gibi maddeleri çekme özelliğine sahiptir.",
+                "7. Yazı: Sağlıklı kalmak için vücudumuzun ihtiyaç duyduğu temel besin gruplarından tüketmeliyiz."
             ]
         };
 
@@ -459,13 +468,13 @@
                 { q: "'Siyah' sözcüğünün eş anlamlısı hangisidir?", options: ["A) Beyaz", "B) Kara", "C) Kırmızı"], ans: "B" },
                 { q: "Hangi seçenekteki kelime zıt anlamlıdır?", options: ["A) Uzun - Kısa", "B) Mektep - Okul", "C) Al - Kırmızı"], ans: "A" },
                 { q: "Soru cümlelerinin sonuna hangi noktalama işareti konur?", options: ["A) Nokta (.)", "B) Soru İşareti (?)", "C) Virgül (,)"], ans: "B" },
-                { q: "Aşağıdakilerden hangisi bir özel isimdir?", options: ["A) Kedi", "B) Ankara", "C) Masa"], ans: "B" },
                 { q: "'Kitap' kelimesi kaç heceden oluşur?", options: ["A) 1", "B) 2", "C) 3"], ans: "B" },
                 { q: "Aşağıdaki cümlelerin hangisinde yazım hatası vardır?", options: ["A) ali okula gitti.", "B) Ali okula gitti.", "C) Bugün ders var."], ans: "A" },
                 { q: "'Geniş' kelimesinin zıt anlamlısı nedir?", options: ["A) Dar", "B) Büyük", "C) Uzun"], ans: "A" },
                 { q: "Şiir yazan kişiye ne denir?", options: ["A) Yazar", "B) Şair", "C) Oyuncu"], ans: "B" },
-                { q: "Aşağıdakilerden hangisi bir eylem (fiil) bildirir?", options: ["A) Koşmak", "B) Kalem", "C) Güzel"], ans: "A" },
-                { q: "Cümleye nasıl bir harfle başlanır?", options: ["A) Küçük harfle", "B) Büyük harfle", "C) Fark etmez"], ans: "B" }
+                { q: "Aşağıdakilerden hangisi bir eylem bildirir?", options: ["A) Koşmak", "B) Kalem", "C) Güzel"], ans: "A" },
+                { q: "Cümleye nasıl bir harfle başlanır?", options: ["A) Küçük harfle", "B) Büyük harfle", "C) Fark etmez"], ans: "B" },
+                { q: "Aşağıdakilerden hangisi bir özel isimdir?", options: ["A) Kedi", "B) Ankara", "C) Masa"], ans: "B" }
             ],
             "Fen Bilimleri": [
                 { q: "Maddenin kaç temel hali vardır?", options: ["A) 2", "B) 3", "C) 4"], ans: "B" },
@@ -584,7 +593,7 @@
                             <span id="unitIcon-${i}">➕</span>
                         </div>
                         <div class="unit-body hidden" id="unitBody-${i}">
-                            <button class="action-btn" onclick="openUnityReader(${i})">📖 Unity Yazı Okuma (Sesli Asistan)</button>
+                            <button class="action-btn" onclick="openUnityReader(${i})">📖 Unity Yazı Okuma (1'den 7'ye Sıralı Sesli Asistan)</button>
                             <button class="action-btn" onclick="startWork(${i})">📝 Ünite Çalışması (Sürüklemeli 5 Soru)</button>
                             <button class="action-btn" onclick="openQuiz(${i})">🎯 Konu Tarama Testi (10 Soru)</button>
                         </div>
@@ -605,7 +614,7 @@
             }
         }
 
-        // --- UNITY YAZI OKUMA SİSTEMİ ---
+        // --- SIRALI AUTOMATIC UNITY YAZI OKUMA (1'den 7'ye Geçişli) ---
         function openUnityReader(unitNo) {
             currentUnityTexts = unityReadDatabase[currentUser.currentSubject] || unityReadDatabase["Hayat Bilgisi"];
             currentUnityIndex = 0;
@@ -614,10 +623,10 @@
                 <h3>📖 Ünite ${unitNo} - ${currentUser.currentSubject} Unity Yazı Okuma</h3>
                 <div class="unity-reader-box">
                     <div class="unity-screen" id="unityTextDisplay">
-                        Yazı yükleniyor...
+                        Sıralı yazılar yükleniyor...
                     </div>
                     <div style="display:flex; justify-content:center; gap:10px;">
-                        <button class="btn-submit" style="width:auto; padding:8px 16px;" onclick="playNextUnityText()">▶️ Okumayı Başlat / Sonraki Yazı</button>
+                        <button class="btn-submit" style="width:auto; padding:8px 16px;" onclick="playNextUnityText()">▶️ Sonraki Yazıya Geç</button>
                         <button class="btn-submit" style="width:auto; padding:8px 16px; background:#e53e3e;" onclick="stopUnityReader()">⏸️ Durdur</button>
                     </div>
                 </div>
@@ -634,18 +643,19 @@
             }
 
             const textToRead = currentUnityTexts[currentUnityIndex];
-            document.getElementById('unityTextDisplay').innerHTML = `<b>[Yazı ${currentUnityIndex + 1} / ${currentUnityTexts.length}]</b><br><br>${textToRead}`;
+            document.getElementById('unityTextDisplay').innerHTML = `<b>[Yazı ${currentUnityIndex + 1} / 7]</b><br><br>${textToRead}`;
 
             const utterance = new SpeechSynthesisUtterance(textToRead);
             utterance.lang = 'tr-TR';
             utterance.rate = 0.95;
 
+            // Yazı tamamlanınca otomatik olarak 2, 3, 4, 5, 6, 7'ye geçer
             utterance.onend = function() {
                 currentUnityIndex++;
                 if (currentUnityIndex < currentUnityTexts.length) {
-                    setTimeout(() => { playNextUnityText(); }, 800);
+                    setTimeout(() => { playNextUnityText(); }, 1000);
                 } else {
-                    document.getElementById('unityTextDisplay').innerHTML += "<br><br><b>🎉 Tüm yazılar başarıyla okundu!</b>";
+                    document.getElementById('unityTextDisplay').innerHTML += "<br><br><b>🎉 1'den 7'ye tüm yazılar başarıyla okundu!</b>";
                 }
             };
 
@@ -791,7 +801,7 @@
             showModal(resultHtml);
         }
 
-        // --- ÖĞRETİCİ YAPAY ZEKA SOHBETİ VE KURALLAR ---
+        // --- GELİŞMİŞ VE DİNAMİK YAPAY ZEKA SOHBETİ (SÜREKLİ TEKRAR ENGELİ) ---
         function toggleAiDrawer() {
             document.getElementById('aiDrawer').classList.toggle('open');
         }
@@ -817,25 +827,44 @@
 
             setTimeout(() => {
                 status.innerText = "";
-                let botReply = "Harika bir soru! Anlamadığın yerlerde sana destek olmaktan mutluluk duyarım.";
-                
+                let botReply = "";
                 const lowerText = text.toLowerCase();
-                
-                // Kod yazma isteği kontrolü
+
+                // Kod yazma isteği engeli
                 if (lowerText.includes('kod yaz') || lowerText.includes('program yaz') || lowerText.includes('script yaz') || lowerText.includes('html yaz') || lowerText.includes('javascript yaz')) {
                     botReply = "Üzgünüm, ben sadece temel ve yazı yazabilen bir botum, yani bir yapay zekayım. O yüzden bu istediğinizi yerine getiremem ama kodlarla size bilgi verebilirim.";
                 } 
                 else if (lowerText.includes('merhaba') || lowerText.includes('selam')) {
-                    botReply = `Selam ${currentUser.name || 'öğrencim'}! Bugün ders çalışmaya hazır mısın?`;
+                    const greetings = [
+                        `Selam ${currentUser.name || 'öğrencim'}! Harika bir gün, ders çalışmaya hazır mısın?`,
+                        `Merhaba ${currentUser.name || 'öğrencim'}! Sana nasıl yardımcı olabilirim?`,
+                        "Selamlar! Bugün hangi dersi keşfetmek istersin?"
+                    ];
+                    botReply = greetings[Math.floor(Math.random() * greetings.length)];
                 } 
-                else if (lowerText.includes('nasılsın') || lowerText.includes('nasıl gidliyor') || lowerText.includes('iyi misin')) {
-                    botReply = "Çok teşekkür ederim, gayet iyiyim! Sen nasılsın, derslerin nasıl gidiyor?";
+                else if (lowerText.includes('nasılsın') || lowerText.includes('nasıl gidiyor') || lowerText.includes('iyi misin')) {
+                    const statusReplies = [
+                        "Çok teşekkür ederim, harikayım! Sen nasılsın, derslerin nasıl gidiyor?",
+                        "Ben bir yapay zeka botuyum ve seninle öğrenmek beni çok mutlu ediyor! Sen nasılsın?",
+                        "İyiyim! Yeni şeyler öğrenmeye ve sana rehberlik etmeye hazırım."
+                    ];
+                    botReply = statusReplies[Math.floor(Math.random() * statusReplies.length)];
                 } 
                 else if (lowerText.includes('matematik')) {
-                    botReply = "Matematik bulmaca çözmek gibidir! Ünite testlerini çözerek harika pratik yapabilirsin.";
+                    botReply = "Matematik sayıların büyülü dünyasıdır! Ünite testlerini çözerek pratik yapabilirsin.";
                 } 
                 else if (lowerText.includes('atatürk')) {
-                    botReply = "Mustafa Kemal Atatürk 1881 yılında Selanik'te doğmuştur ve Cumhuriyetimizin kurucusudur.";
+                    botReply = "Mustafa Kemal Atatürk 1881 yılında Selanik'te doğmuştur, Cumhuriyetimizin kurucusu ve ulu önderimizdir.";
+                } 
+                else {
+                    // Rastgele çeşitli rehber cevapları (Sürekli aynı kalıp tekrarlanmasın)
+                    const generalReplies = [
+                        "Bu konu hakkında daha fazla bilgi almak için ünitedeki Unity Yazı Okuma bölümünü dinleyebilirsin!",
+                        "Anladım! Derslerinde başarılı olmak için ünite çalışmalarını tam zamanında yapman çok faydalı olacaktır.",
+                        "Oldukça merak uyandırıcı! Başka hangi ders veya konu hakkında konuşmak istersin?",
+                        "Bu soru harika! Konu tarama testlerini çözerek bu alandaki bilgini hemen test edebilirsin."
+                    ];
+                    botReply = generalReplies[Math.floor(Math.random() * generalReplies.length)];
                 }
 
                 chatBody.innerHTML += `
