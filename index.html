@@ -159,7 +159,7 @@
         }
         .quiz-option.selected { background: #667eea; color: white; border-color: #5a6fd6; }
 
-        /* YANDAN AÇILAN YAPAY ZEKA PANELİ */
+        /* YAPAY ZEKA PANELİ */
         .ai-drawer {
             position: fixed; top: 0; right: -420px; width: 380px; height: 100%;
             background: white; box-shadow: -5px 0 25px rgba(0,0,0,0.2); z-index: 2000;
@@ -218,7 +218,7 @@
             font-size: 16px; color: #e0e7ff; line-height: 1.5; margin-bottom: 15px;
         }
 
-        /* İNGİLİZCE KÜTÜPHANE & ARAMA */
+        /* İNGİLİZCE KÜTÜPHANE */
         .search-box-input {
             width: 100%; padding: 12px; border: 2px solid #cbd5e0; border-radius: 8px; font-size: 14px; margin-bottom: 15px; box-sizing: border-box;
         }
@@ -422,7 +422,7 @@
         
         let currentBook = null;
         let currentBookPageIndex = 0;
-        let currentBookMode = ''; // 'read' or 'listen'
+        let currentBookMode = ''; 
 
         let bookProgress = {}; 
 
@@ -630,6 +630,7 @@
             resetChatDrawer();
         }
 
+        // --- İNGİLİZCE KÜTÜPHANE VE ARAMA SİSTEMİ ---
         function renderEnglishLibrary(filterText = '') {
             const container = document.getElementById('bookGridContainer');
             container.innerHTML = "";
@@ -708,7 +709,7 @@
             const pageText = currentBook.pages[currentBookPageIndex];
             document.getElementById('bookPageDisplay').innerHTML = `<b>[Page ${currentBookPageIndex + 1} / ${currentBook.pages.length}]</b><br><br>${pageText}`;
 
-            // SESLİ OKUMA: Sayfa etiketi okunmaz, sadece asıl metin okunur
+            // SESLİ OKUMA: Sayfa etiketi kesinlikle okunmaz, sadece metin seslendirilir
             const utterance = new SpeechSynthesisUtterance(pageText);
             utterance.lang = 'en-US';
             utterance.rate = 0.9;
@@ -837,10 +838,10 @@
 
             const textToRead = currentUnityTexts[currentUnityIndex];
 
-            // Ekranda kaçıncı yazı olduğu gösterilir
+            // Ekranda kaçıncı yazı olduğu görünür
             document.getElementById('unityTextDisplay').innerHTML = `<b>[Yazı ${currentUnityIndex + 1} / ${currentUnityTexts.length}]</b><br><br>${textToRead}`;
 
-            // SESLİ OKUMA: "1. Yazı" denmez, doğrudan 'textToRead' metni seslendirilir
+            // SESLİ OKUMA: "1. Yazı" etiketi okunmaz, sadece metin seslendirilir
             const utterance = new SpeechSynthesisUtterance(textToRead);
             utterance.lang = 'tr-TR';
             utterance.rate = 0.95;
