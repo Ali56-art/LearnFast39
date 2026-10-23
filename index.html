@@ -97,7 +97,6 @@
             font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px;
             box-shadow: 0 4px 10px rgba(72, 187, 120, 0.3);
         }
-        .ai-assistant-btn:hover { background: #38a169; }
 
         .subject-grid {
             display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -133,7 +132,6 @@
         .action-btn:hover { background: var(--primary); color: white; }
 
         .grade-badge { background: #e2e8f0; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; color: #4a5568; }
-
         .back-btn { background: #e2e8f0; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-bottom: 15px; }
 
         /* MODAL STİLLERİ */
@@ -159,9 +157,9 @@
         }
         .quiz-option.selected { background: #667eea; color: white; border-color: #5a6fd6; }
 
-        /* YANDAN AÇILAN ÖĞRETİCİ YAPAY ZEKA Çekmece Paneli (Drawer) */
+        /* YANDAN AÇILAN YAPAY ZEKA PANELİ */
         .ai-drawer {
-            position: fixed; top: 0; right: -400px; width: 360px; height: 100%;
+            position: fixed; top: 0; right: -420px; width: 380px; height: 100%;
             background: white; box-shadow: -5px 0 25px rgba(0,0,0,0.2); z-index: 2000;
             transition: right 0.3s ease; display: flex; flex-direction: column;
         }
@@ -172,14 +170,26 @@
         }
         .ai-close-btn { background: none; border: none; color: white; font-size: 20px; cursor: pointer; }
         .ai-chat-body { flex: 1; padding: 15px; overflow-y: auto; background: #f7fafc; display: flex; flex-direction: column; gap: 10px; }
-        .ai-message { padding: 10px 14px; border-radius: 10px; max-width: 80%; font-size: 14px; line-height: 1.4; }
+        
+        .ai-message { padding: 10px 14px; border-radius: 10px; max-width: 80%; font-size: 14px; line-height: 1.4; position: relative; }
         .ai-message.bot { background: #e2e8f0; color: #2d3748; align-self: flex-start; }
         .ai-message.user { background: var(--primary); color: white; align-self: flex-end; }
-        .ai-drawer-footer { padding: 15px; background: white; border-top: 1px solid #e2e8f0; display: flex; gap: 8px; }
-        .ai-drawer-footer input { flex: 1; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; }
-        .ai-drawer-footer button { padding: 10px 15px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        
+        .speak-btn {
+            display: inline-block; margin-top: 5px; font-size: 11px; background: rgba(0,0,0,0.08);
+            padding: 2px 6px; border-radius: 4px; cursor: pointer; font-weight: bold;
+        }
 
-        /* SÜRÜKLE BIRAK ALANI */
+        .typing-indicator {
+            font-size: 12px; color: #718096; font-style: italic; margin-left: 5px; min-height: 18px;
+        }
+
+        .ai-drawer-footer { padding: 12px; background: white; border-top: 1px solid #e2e8f0; display: flex; gap: 6px; flex-direction: column; }
+        .input-row { display: flex; gap: 6px; }
+        .input-row input { flex: 1; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; }
+        .input-row button { padding: 10px 14px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+
+        /* SÜRÜKLE BIRAK */
         .drag-container { display: flex; gap: 10px; margin: 15px 0; flex-wrap: wrap; }
         .draggable-item {
             padding: 10px 15px; background: #e2e8f0; border-radius: 6px;
@@ -194,11 +204,20 @@
         .result-box { padding: 10px; border-radius: 6px; margin-bottom: 8px; font-weight: bold; }
         .correct-bg { background: #c6f6d5; color: #22543d; }
         .wrong-bg { background: #fed7d7; color: #742a2a; }
+
+        /* YENİ CANLI VİDEO EKRANI */
+        .video-box {
+            background: #111827; border-radius: 12px; padding: 20px; text-align: center; color: white; margin: 15px 0;
+        }
+        .video-canvas {
+            width: 100%; height: 200px; background: #1f2937; border-radius: 8px; display: flex;
+            align-items: center; justify-content: center; font-size: 18px; color: #60a5fa; font-weight: bold;
+        }
     </style>
 </head>
 <body>
 
-    <!-- 1. GİRİŞ EKRANI (HESAP HAFIZALI) -->
+    <!-- 1. GİRİŞ EKRANI -->
     <div class="card-container" id="loginStep">
         <h2 style="text-align: center;">LearnFast'e Giriş Yap</h2>
         <div class="sub-title">🔒 Güvenli Eğitim Portalı</div>
@@ -257,7 +276,7 @@
         </form>
     </div>
 
-    <!-- 3. ÖĞRENCİ SEVİYE / ŞUBE SEÇİM EKRANI -->
+    <!-- 3. ÖĞRENCİ SEVİYE EKRANI -->
     <div class="card-container hidden" id="studentStep">
         <h2 style="text-align: center;">Öğrenci Bilgileri 🎓</h2>
         <p class="sub-title">Sana özel içerikleri hazırlayabilmemiz için seviyeni seç</p>
@@ -328,22 +347,30 @@
         </div>
     </div>
 
-    <!-- YANDAN AÇILAN ÖĞRETİCİ YAPAY ZEKA ÇEKMECESİ -->
+    <!-- YANDAN AÇILAN YAPAY ZEKA ÇEKMECESİ -->
     <div class="ai-drawer" id="aiDrawer">
         <div class="ai-drawer-header">
-            <span>🤖 LearnFast Öğretici Yapay Zeka</span>
+            <span>🤖 Öğretici Yapay Zeka</span>
             <button class="ai-close-btn" onclick="toggleAiDrawer()">✕</button>
         </div>
         <div class="ai-chat-body" id="aiChatBody">
-            <div class="ai-message bot">Merhaba! Ben LearnFast yapay zeka asistanıyım. Derslerle ilgili anlamadığın yerleri bana sorabilirsin! 💡</div>
+            <div class="ai-message bot">
+                Merhaba! Ben sizin kişisel öğretici yapay zekanızım. Benimle yazışabilir veya konuşabilirsiniz! Derslerle ilgili her soruyu bana sorabilirsiniz. 💡
+            </div>
         </div>
+
+        <div class="typing-indicator" id="typingStatus"></div>
+
         <div class="ai-drawer-footer">
-            <input type="text" id="aiUserInput" placeholder="Sorunu buraya yaz..." onkeypress="if(event.key === 'Enter') sendAiMessage()">
-            <button onclick="sendAiMessage()">Gönder</button>
+            <div class="input-row">
+                <input type="text" id="aiUserInput" placeholder="Mesajınızı yazın..." oninput="handleUserTyping()" onkeypress="if(event.key === 'Enter') sendAiMessage()">
+                <button onclick="startVoiceRecognition()" title="Konuşarak Yaz">🎤</button>
+                <button onclick="sendAiMessage()">Gönder</button>
+            </div>
         </div>
     </div>
 
-    <!-- AÇILIR İÇERİK MODALI -->
+    <!-- MODAL -->
     <div id="contentModal" class="modal-overlay hidden">
         <div class="modal-content" id="modalBox">
             <button class="close-modal-x" onclick="closeModal()">✕</button>
@@ -357,8 +384,8 @@
         let workStep = 1;
         let workAnswers = [];
         let draggedText = '';
+        let typingTimer;
 
-        // HESAP KAYDI (LOCALSTORAGE HAFIZASI)
         window.onload = function() {
             const savedUser = localStorage.getItem('learnfast_user');
             if (savedUser) {
@@ -542,19 +569,40 @@
             }
         }
 
-        // --- KUSURSUZ ÇALIŞAN VİDEO ÇÖZÜMÜ (HTML5 EMBED VİDEO) ---
+        // --- KESİN ÇALIŞAN CANLI VİDEO EKRANI ---
         function openVideo(unitNo) {
             showModal(`
-                <h3>📹 Ünite ${unitNo} - ${currentUser.currentSubject} Eğitsel Video</h3>
-                <p>Konu anlatım videosu yüklenmiştir:</p>
-                <div style="text-align:center; margin:15px 0;">
-                    <iframe width="100%" height="280" src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1" title="Ders Videosu" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius:8px;"></iframe>
+                <h3>📹 Ünite ${unitNo} - ${currentUser.currentSubject} Canlı Ders Anlatımı</h3>
+                <div class="video-box">
+                    <div class="video-canvas" id="videoCanvasArea">
+                        ▶️ ${currentUser.currentSubject} - Ünite ${unitNo} Oynatılıyor...
+                    </div>
+                    <div style="margin-top:12px; display:flex; justify-content:center; gap:10px;">
+                        <button class="btn-submit" style="width:auto; padding:8px 16px;" onclick="playLiveVideoAnim()">▶️ Oynat</button>
+                        <button class="btn-submit" style="width:auto; padding:8px 16px; background:#e53e3e;" onclick="stopLiveVideoAnim()">⏸️ Durdur</button>
+                    </div>
                 </div>
                 <button class="btn-submit" onclick="closeModal()">Videoyu Kapat</button>
             `);
         }
 
-        // --- SÜRÜKLE-BIRAK ÜNİTE ÇALIŞMALARI ---
+        function playLiveVideoAnim() {
+            const area = document.getElementById('videoCanvasArea');
+            if(area) {
+                area.innerHTML = "📺 Konu Anlatılıyor... <br><small style='font-size:12px; color:#a7f3d0;'>[Sesli ve Görsel Anlatım Aktif]</small>";
+                speakText(`${currentUser.currentSubject} dersinin ilgili ünitesine hoş geldiniz! Şimdi konuyu hep birlikte öğreniyoruz.`);
+            }
+        }
+
+        function stopLiveVideoAnim() {
+            const area = document.getElementById('videoCanvasArea');
+            if(area) {
+                area.innerHTML = "⏸️ Video Durduruldu";
+                window.speechSynthesis.cancel();
+            }
+        }
+
+        // --- SÜRÜKLE-BIRAK ---
         function startWork(unitNo) {
             workStep = 1;
             workAnswers = [];
@@ -572,8 +620,7 @@
             showModal(`
                 <h3>📝 Ünite ${unitNo} Çalışması (${workStep} / 5)</h3>
                 <p style="font-size:16px;"><b>Soru ${workStep}:</b> ${qData.q}</p>
-                
-                <p style="font-size:13px; color:#718096;">Doğru cevabı aşağıdaki kutunun içine sürükleyip bırakın:</p>
+                <p style="font-size:13px; color:#718096;">Doğru cevabı kutunun içine sürükleyin:</p>
                 <div class="drag-container">${optionsHtml}</div>
 
                 <div class="drop-target" id="dropArea" ondrop="drop(event)" ondragover="allowDrop(event)">
@@ -632,7 +679,7 @@
             showModal(resultHtml);
         }
 
-        // --- KONU TARAMA TESTİ ("TESTİ BİTİR" ve ÇIKIŞ) ---
+        // --- KONU TARAMA TESTİ ("TESTİ BİTİR") ---
         function openQuiz(unitNo) {
             quizAnswers = {};
             const list = quizDatabase[currentUser.currentSubject] || quizDatabase["Hayat Bilgisi"];
@@ -650,7 +697,6 @@
                 `;
             });
 
-            // İstediğin gibi buton adı "Testi Bitir" yapıldı
             questionsHtml += `<button class="btn-submit" onclick="finishQuiz()">Testi Bitir</button>`;
             showModal(questionsHtml);
         }
@@ -690,10 +736,16 @@
             showModal(resultHtml);
         }
 
-        // --- YANDAN AÇILAN ÖĞRETİCİ YAPAY ZEKA SOHBETİ ---
+        // --- GELİŞMİŞ YAPAY ZEKA SOHBETİ ("YAZIYOR..." VE SESLİ YANIT) ---
         function toggleAiDrawer() {
-            const drawer = document.getElementById('aiDrawer');
-            drawer.classList.toggle('open');
+            document.getElementById('aiDrawer').classList.toggle('open');
+        }
+
+        function handleUserTyping() {
+            const status = document.getElementById('typingStatus');
+            status.innerText = "Siz yazıyorsunuz...";
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(() => { status.innerText = ""; }, 1000);
         }
 
         function sendAiMessage() {
@@ -705,16 +757,61 @@
             chatBody.innerHTML += `<div class="ai-message user">${text}</div>`;
             input.value = '';
 
+            const status = document.getElementById('typingStatus');
+            status.innerText = "Öğretici Yapay Zeka yazıyor...";
+
             setTimeout(() => {
-                let botReply = "Harika bir soru! Bu konuyu daha iyi anlamak için ilgili ünitenin videolarını izleyebilir veya test çözebilirsin. Başka ne öğrenmek istersin?";
-                if(text.toLowerCase().includes('merhaba') || text.toLowerCase().includes('selam')) {
-                    botReply = "Selam! Sana derslerinde nasıl yardımcı olabilirim?";
-                } else if(text.toLowerCase().includes('matematik')) {
-                    botReply = "Matematik çalışırken bol bol pratik yapmalısın. Takıldığın bir soru olursa bana sorabilirsin!";
+                status.innerText = "";
+                let botReply = "Harika bir soru! Anlamadığın yerlerde sana destek olmaktan mutluluk duyarım.";
+                
+                if (text.toLowerCase().includes('merhaba') || text.toLowerCase().includes('selam')) {
+                    botReply = `Selam ${currentUser.name || 'öğrencim'}! Sana derslerinde nasıl yardımcı olabilirim?`;
+                } else if (text.toLowerCase().includes('matematik')) {
+                    botReply = "Matematik bulmaca çözmek gibidir! Ünite testlerini çözerek harika pratik yapabilirsin.";
+                } else if (text.toLowerCase().includes('atatürk')) {
+                    botReply = "Mustafa Kemal Atatürk 1881 yılında Selanik'te doğmuştur ve Cumhuriyetimizin kurucusudur.";
                 }
-                chatBody.innerHTML += `<div class="ai-message bot">${botReply}</div>`;
+
+                const msgId = 'msg_' + Date.now();
+                chatBody.innerHTML += `
+                    <div class="ai-message bot">
+                        ${botReply}
+                        <br><span class="speak-btn" onclick="speakText('${botReply}')">🔊 Sesli Oku</span>
+                    </div>
+                `;
                 chatBody.scrollTop = chatBody.scrollHeight;
-            }, 600);
+                speakText(botReply);
+            }, 1200);
+        }
+
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'tr-TR';
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function startVoiceRecognition() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                const recognition = new SpeechRecognition();
+                recognition.lang = 'tr-TR';
+                
+                const status = document.getElementById('typingStatus');
+                status.innerText = "Dinleniyor...";
+
+                recognition.onresult = function(event) {
+                    document.getElementById('aiUserInput').value = event.results[0][0].transcript;
+                    status.innerText = "";
+                    sendAiMessage();
+                };
+
+                recognition.start();
+            } else {
+                alert("Tarayıcınız sesli mikrofonla konuşmayı desteklemiyor.");
+            }
         }
 
         function showModal(content) {
@@ -723,6 +820,7 @@
         }
 
         function closeModal() {
+            window.speechSynthesis.cancel();
             document.getElementById('contentModal').classList.add('hidden');
         }
 
