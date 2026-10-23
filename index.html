@@ -218,12 +218,18 @@
             font-size: 16px; color: #e0e7ff; line-height: 1.5; margin-bottom: 15px;
         }
 
-        /* İNGİLİZCE KÜTÜPHANE */
-        .book-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px; }
+        /* İNGİLİZCE KÜTÜPHANE & ARAMA */
+        .search-box-input {
+            width: 100%; padding: 12px; border: 2px solid #cbd5e0; border-radius: 8px; font-size: 14px; margin-bottom: 15px; box-sizing: border-box;
+        }
+        .book-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
         .book-card { background: #f8fafc; border: 2px solid #cbd5e0; border-radius: 10px; padding: 15px; text-align: center; position: relative; }
         .book-card h4 { margin: 5px 0 10px 0; color: #2b6cb0; }
-        .completed-tick { position: absolute; top: 10px; right: 10px; font-size: 20px; display: none; }
+        .completed-tick { position: absolute; top: 10px; right: 10px; font-size: 22px; display: none; }
         .book-card.completed .completed-tick { display: block; }
+        
+        .task-status-badge { font-size: 11px; font-weight: bold; padding: 3px 8px; border-radius: 12px; background: #e2e8f0; color: #4a5568; margin-bottom: 8px; display: inline-block; }
+        .task-status-badge.done { background: #c6f6d5; color: #22543d; }
     </style>
 </head>
 <body>
@@ -362,20 +368,22 @@
             <button class="back-btn" id="backBtnText" onclick="goBackToSubjects()">⬅️ Derslere Geri Dön</button>
             <h3 id="selectedSubjectTitle" style="text-align: left; color: var(--primary);"></h3>
 
-            <!-- İNGİLİZCE ÖZEL KÜTÜPHANE ALANI -->
+            <!-- İNGİLİZCE KÜTÜPHANE VE KİTAP ARAMA ALANI -->
             <div id="englishLibraryArea" class="hidden">
-                <p style="color: #4a5568; font-weight: bold;">📚 English Library - Read & Listen Books</p>
+                <p style="color: #4a5568; font-weight: bold; margin-bottom: 8px;">📚 English Library - Read & Listen Books</p>
+                <input type="text" id="bookSearchInput" class="search-box-input" placeholder="🔍 Kitap Ara / Search Book Name..." oninput="filterEnglishBooks()">
                 <div class="book-grid" id="bookGridContainer"></div>
-                <hr style="margin: 25px 0; border: 0; border-top: 1px dashed #cbd5e0;">
             </div>
 
-            <p id="unitSubHeader" style="color: #718096; font-size: 14px;">Çalışmak istediğiniz üniteye tıklayın:</p>
-
-            <div class="unit-list" id="unitListContainer"></div>
+            <!-- TÜRKÇE DERSLERİN ÜNİTE LİSTESİ -->
+            <div id="unitSectionArea">
+                <p id="unitSubHeader" style="color: #718096; font-size: 14px;">Çalışmak istediğiniz üniteye tıklayın:</p>
+                <div class="unit-list" id="unitListContainer"></div>
+            </div>
         </div>
     </div>
 
-    <!-- YANDAN AÇILAN YAPAY ZEKA ÇEKMECESİ -->
+    <!-- YANDAN AÇILAN YAPAY ZEKA PANELİ -->
     <div class="ai-drawer" id="aiDrawer">
         <div class="ai-drawer-header">
             <span id="aiHeaderTitle">🤖 Öğretici Yapay Zeka</span>
@@ -414,10 +422,9 @@
         
         let currentBook = null;
         let currentBookPageIndex = 0;
-        let bookReadCompleted = false;
-        let bookListenCompleted = false;
+        let currentBookMode = ''; // 'read' or 'listen'
 
-        let completedBooks = {};
+        let bookProgress = {}; 
 
         window.onload = function() {
             const savedUser = localStorage.getItem('learnfast_user');
@@ -432,66 +439,76 @@
                 id: "b1",
                 title: "The Little Adventurer",
                 pages: [
-                    "Page 1: Once upon a time, a little puppy named Max loved exploring the forest.",
-                    "Page 2: Max found a mysterious shiny golden key under an old oak tree.",
-                    "Page 3: The key opened a small wooden chest full of colorful magical apples.",
-                    "Page 4: Max shared the apples with all his animal friends in the forest."
+                    "Once upon a time, a little puppy named Max loved exploring the forest.",
+                    "Max found a mysterious shiny golden key under an old oak tree.",
+                    "The key opened a small wooden chest full of colorful magical apples.",
+                    "Max shared the apples with all his animal friends in the forest."
                 ]
             },
             {
                 id: "b2",
                 title: "Journey to Space",
                 pages: [
-                    "Page 1: Timmy built a small silver rocket ship in his backyard.",
-                    "Page 2: He flew past the bright moon and smiled at the shining stars.",
-                    "Page 3: A friendly green alien invited him for lunch on Mars.",
-                    "Page 4: Timmy returned home safely with wonderful space stories."
+                    "Timmy built a small silver rocket ship in his backyard.",
+                    "He flew past the bright moon and smiled at the shining stars.",
+                    "A friendly green alien invited him for lunch on Mars.",
+                    "Timmy returned home safely with wonderful space stories."
+                ]
+            },
+            {
+                id: "b3",
+                title: "The Secret Garden",
+                pages: [
+                    "Lily found an overgrown secret garden behind her grandfather's old house.",
+                    "She planted bright red roses and watered them carefully every day.",
+                    "Beautiful blue butterflies flew into the garden and stayed forever."
+                ]
+            },
+            {
+                id: "b4",
+                title: "The Magic Whistle",
+                pages: [
+                    "Leo bought a tiny wooden whistle at a traditional village fair.",
+                    "When he blew into it, sweet melodies made birds sing along with him."
                 ]
             }
         ];
 
         const unityReadDatabase = {
             "Hayat Bilgisi": [
-                "1. Yazı: Okulumuzda ve sınıfımızda uymamız gereken kurallar vardır.",
-                "2. Yazı: Evimizde ailemize destek olmak için bazı sorumluluklar üstleniriz.",
-                "3. Yazı: Sağlığımızı korumak için dengeli beslenmeli ve temizliğe dikkat etmeliyiz.",
-                "4. Yazı: Trafikte güvenle yürümek için yaya kurallarına uymalıyız.",
-                "5. Yazı: Ülkemizin doğasını ve tarihi değerlerini korumak görevimizdir."
+                "Okulumuzda ve sınıfımızda uymamız gereken kurallar vardır.",
+                "Evimizde ailemize destek olmak için bazı sorumluluklar üstleniriz.",
+                "Sağlığımızı korumak için dengeli beslenmeli ve temizliğe dikkat etmeliyiz.",
+                "Trafikte güvenle yürümek için yaya kurallarına uymalıyız.",
+                "Ülkemizin doğasını ve tarihi değerlerini korumak görevimizdir."
             ],
             "Matematik": [
-                "1. Yazı: Sayılar ve basamak değerleri temel matematiğin altyapısıdır.",
-                "2. Yazı: Toplama ve çıkarma günlük hayatta en çok kullandığımız işlemlerdir.",
-                "3. Yazı: Çarpım tablosu zihinden hızlı hesaplama yapmamıza yardım eder.",
-                "4. Yazı: Kesirler bir bütünün parçalarını ifade etmek için kullanılır.",
-                "5. Yazı: Geometrik şekillerin alan ve çevre hesaplamaları hayatımızı kolaylaştırır."
+                "Sayılar ve basamak değerleri temel matematiğin altyapısıdır.",
+                "Toplama ve çıkarma günlük hayatta en çok kullandığımız işlemlerdir.",
+                "Çarpım tablosu zihinden hızlı hesaplama yapmamıza yardım eder.",
+                "Kesirler bir bütünün parçalarını ifade etmek için kullanılır.",
+                "Geometrik şekillerin alan ve çevre hesaplamaları hayatımızı kolaylaştırır."
             ],
             "Türkçe": [
-                "1. Yazı: Okuduğumuz metinlerde ana fikri bulmak okuduğunu anlama yeteneğini artırır.",
-                "2. Yazı: Eş anlamlı kelimeler yazılışları farklı ama anlamları aynı sözcüklerdir.",
-                "3. Yazı: Noktalama işaretleri cümlelerin doğru anlaşılmasını sağlar.",
-                "4. Yazı: Yazım kurallarına dikkat etmek metinlerimizi düzenli kılar.",
-                "5. Yazı: Şiir ve hikayeler kelime haznemizi zenginleştirir."
+                "Okuduğumuz metinlerde ana fikri bulmak okuduğunu anlama yeteneğini artırır.",
+                "Eş anlamlı kelimeler yazılışları farklı ama anlamları aynı sözcüklerdir.",
+                "Noktalama işaretleri cümlelerin doğru anlaşılmasını sağlar.",
+                "Yazım kurallarına dikkat etmek metinlerimizi düzenli kılar.",
+                "Şiir ve hikayeler kelime haznemizi zenginleştirir."
             ],
             "Fen Bilimleri": [
-                "1. Yazı: Yer kabuğu üzerinde yaşadığımız ve canlılara ev sahipliği yapan katmandır.",
-                "2. Yazı: Canlılar doğada bitkiler ve hayvanlar şeklinde çeşitlilik gösterir.",
-                "3. Yazı: Kuvvet cisimlerin hareket yönünü ve hızını değiştirebilir.",
-                "4. Yazı: Maddenin katı, sıvı ve gaz olmak üzere üç temel hali bulunur.",
-                "5. Yazı: Işık ve ses etrafımızı algılamamızı sağlayan enerjilerdir."
+                "Yer kabuğu üzerinde yaşadığımız ve canlılara ev sahipliği yapan katmandır.",
+                "Canlılar doğada bitkiler ve hayvanlar şeklinde çeşitlilik gösterir.",
+                "Kuvvet cisimlerin hareket yönünü ve hızını değiştirebilir.",
+                "Maddenin katı, sıvı ve gaz olmak üzere üç temel hali bulunur.",
+                "Işık ve ses etrafımızı algılamamızı sağlayan enerjilerdir."
             ],
             "Kodlama": [
-                "1. Yazı: HTML, web sayfalarının temel yapısını ve kemiğini oluşturan koddur.",
-                "2. Yazı: Head etiketleri arasına sayfa başlığı ve meta bilgileri yazılır.",
-                "3. Yazı: Body etiketleri içerisine web sitesinde görünen tüm içerikler yazılır.",
-                "4. Yazı: CSS kullanarak web sitelerinin renklerini, yazı tiplerini ve tasarımını düzenleriz.",
-                "5. Yazı: JavaScript web sayfalarına hareket ve dinamik özellikler kazandırır."
-            ],
-            "İngilizce": [
-                "1. Text: Welcome to English class! We learn new words and grammar every day.",
-                "2. Text: Greetings like Hello, Good Morning and How Are You help us speak to friends.",
-                "3. Text: Colors, numbers and animals are fun basics of the English language.",
-                "4. Text: Reading English books builds our vocabulary very fast.",
-                "5. Text: Practice listening and speaking to become fluent in English!"
+                "HTML, web sayfalarının temel yapısını ve kemiğini oluşturan koddur.",
+                "Head etiketleri arasına sayfa başlığı ve meta bilgileri yazılır.",
+                "Body etiketleri içerisine web sitesinde görünen tüm içerikler yazılır.",
+                "CSS kullanarak web sitelerinin renklerini, yazı tiplerini ve tasarımını düzenleriz.",
+                "JavaScript web sayfalarına hareket ve dinamik özellikler kazandırır."
             ]
         };
 
@@ -507,18 +524,6 @@
                 { q: "Bir link (bağlantı) vermek için hangi etiket kullanılır?", options: ["A) <a>", "B) <link>", "C) <button>"], ans: "A" },
                 { q: "HTML kodları hangi uzantı ile kaydedilir?", options: ["A) .html", "B) .exe", "C) .png"], ans: "A" },
                 { q: "Kodlama öğrenmek bize hangi beceriyi kazandırır?", options: ["A) Problem çözme", "B) Resim çizme", "C) Koşma"], ans: "A" }
-            ],
-            "İngilizce": [
-                { q: "What is the English word for 'Elma'?", options: ["A) Apple", "B) Banana", "C) Milk"], ans: "A" },
-                { q: "How do you say 'Günaydın' in English?", options: ["A) Good Morning", "B) Good Night", "C) Goodbye"], ans: "A" },
-                { q: "What color is the sky?", options: ["A) Blue", "B) Red", "C) Green"], ans: "A" },
-                { q: "How many days are there in a week?", options: ["A) Seven", "B) Five", "C) Ten"], ans: "A" },
-                { q: "Which animal says 'Miao'?", options: ["A) Cat", "B) Dog", "C) Cow"], ans: "A" },
-                { q: "What is the opposite of 'Big'?", options: ["A) Small", "B) Tall", "C) Fast"], ans: "A" },
-                { q: "What is 'Kitap' in English?", options: ["A) Book", "B) Pen", "C) Desk"], ans: "A" },
-                { q: "How do you say 'Teşekkür ederim'?", options: ["A) Thank you", "B) Please", "C) Welcome"], ans: "A" },
-                { q: "Which one is a fruit?", options: ["A) Orange", "B) Car", "C) Chair"], ans: "A" },
-                { q: "What do we wear on our feet?", options: ["A) Shoes", "B) Hat", "C) Shirt"], ans: "A" }
             ]
         };
 
@@ -529,13 +534,6 @@
                 { q: "Görünen tüm içeriklerin durduğu yer?", correct: "Body", options: ["Head", "Body", "Title"] },
                 { q: "Paragraf etiketi hangisidir?", correct: "<p>", options: ["<h1>", "<p>", "<a>"] },
                 { q: "Dinamik hareket katan dil?", correct: "JavaScript", options: ["JavaScript", "HTML", "CSS"] }
-            ],
-            "İngilizce": [
-                { q: "Translate 'Kırmızı' to English:", correct: "Red", options: ["Red", "Blue", "Green"] },
-                { q: "Translate 'Okul' to English:", correct: "School", options: ["School", "House", "Park"] },
-                { q: "What is 'Kedi' in English?", correct: "Cat", options: ["Dog", "Cat", "Bird"] },
-                { q: "Opposite of 'Happy'?", correct: "Sad", options: ["Sad", "Fast", "Big"] },
-                { q: "Number '10' in English:", correct: "Ten", options: ["Five", "Ten", "Seven"] }
             ]
         };
 
@@ -595,28 +593,29 @@
             document.getElementById('subjectListArea').classList.add('hidden');
             document.getElementById('subjectDetailArea').classList.remove('hidden');
 
-            // İNGİLİZCEYE GİRİNCE DİL DEĞİŞİMİ
             if (subjectName === 'İngilizce') {
                 document.getElementById('selectedSubjectTitle').innerText = `English Course (Efroomman)`;
                 document.getElementById('englishLibraryArea').classList.remove('hidden');
+                document.getElementById('unitSectionArea').classList.add('hidden');
+
                 document.getElementById('backBtnText').innerText = "⬅️ Back to Subjects";
                 document.getElementById('aiBtnText').innerText = "🤖 English Educational AI";
                 document.getElementById('aiHeaderTitle').innerText = "🤖 English Educational AI";
                 document.getElementById('sendBtnText').innerText = "Send";
-                document.getElementById('unitSubHeader').innerText = "Select a unit to study:";
                 renderEnglishLibrary();
             } else {
                 document.getElementById('selectedSubjectTitle').innerText = `${subjectName} Dersi (6 Ünite)`;
                 document.getElementById('englishLibraryArea').classList.add('hidden');
+                document.getElementById('unitSectionArea').classList.remove('hidden');
+
                 document.getElementById('backBtnText').innerText = "⬅️ Derslere Geri Dön";
                 document.getElementById('aiBtnText').innerText = "🤖 Öğretici Yapay Zeka";
                 document.getElementById('aiHeaderTitle').innerText = "🤖 Öğretici Yapay Zeka";
                 document.getElementById('sendBtnText').innerText = "Gönder";
-                document.getElementById('unitSubHeader').innerText = "Çalışmak istediğiniz üniteye tıklayın:";
+                renderUnits(subjectName);
             }
 
             resetChatDrawer();
-            renderUnits(subjectName);
         }
 
         function goBackToSubjects() {
@@ -625,25 +624,33 @@
             document.getElementById('subjectDetailArea').classList.add('hidden');
             document.getElementById('subjectListArea').classList.remove('hidden');
             
-            // Dili tekrar Türkçe yap
             document.getElementById('aiBtnText').innerText = "🤖 Öğretici Yapay Zeka";
             document.getElementById('aiHeaderTitle').innerText = "🤖 Öğretici Yapay Zeka";
             document.getElementById('sendBtnText').innerText = "Gönder";
             resetChatDrawer();
         }
 
-        function renderEnglishLibrary() {
+        function renderEnglishLibrary(filterText = '') {
             const container = document.getElementById('bookGridContainer');
             container.innerHTML = "";
 
-            englishBooks.forEach(book => {
-                const isCompleted = completedBooks[book.id];
+            const filtered = englishBooks.filter(b => b.title.toLowerCase().includes(filterText.toLowerCase()));
+
+            filtered.forEach(book => {
+                const prog = bookProgress[book.id] || { read: false, listen: false };
+                const isFullyCompleted = prog.read && prog.listen;
+
                 container.innerHTML += `
-                    <div class="book-card ${isCompleted ? 'completed' : ''}" id="bookCard_${book.id}">
+                    <div class="book-card ${isFullyCompleted ? 'completed' : ''}">
                         <div class="completed-tick">✅</div>
                         <h4>📖 ${book.title}</h4>
-                        <p style="font-size:12px; color:#718096;">Short English Story</p>
-                        <div style="display:flex; flex-direction:column; gap:6px; margin-top:10px;">
+                        
+                        <div style="margin-bottom:8px;">
+                            <span class="task-status-badge ${prog.read ? 'done' : ''}">📖 Read: ${prog.read ? 'Done' : 'Not Done'}</span>
+                            <span class="task-status-badge ${prog.listen ? 'done' : ''}">🎧 Listen: ${prog.listen ? 'Done' : 'Not Done'}</span>
+                        </div>
+
+                        <div style="display:flex; flex-direction:column; gap:6px; margin-top:5px;">
                             <button class="action-btn" style="text-align:center; padding:8px;" onclick="openBookModal('${book.id}', 'read')">📖 Read Myself</button>
                             <button class="action-btn" style="text-align:center; padding:8px; background:#48bb78; color:white; border:none;" onclick="openBookModal('${book.id}', 'listen')">🎧 Listen to AI Assistant</button>
                         </div>
@@ -652,47 +659,56 @@
             });
         }
 
+        function filterEnglishBooks() {
+            const query = document.getElementById('bookSearchInput').value;
+            renderEnglishLibrary(query);
+        }
+
         function openBookModal(bookId, mode) {
             currentBook = englishBooks.find(b => b.id === bookId);
             currentBookPageIndex = 0;
-            bookReadCompleted = (mode === 'read');
-            bookListenCompleted = (mode === 'listen');
+            currentBookMode = mode;
 
             showModal(`
-                <h3>📖 ${currentBook.title}</h3>
+                <h3>📖 ${currentBook.title} (${mode === 'read' ? 'Read Mode' : 'Listen Mode'})</h3>
                 <div class="unity-reader-box">
                     <div class="unity-screen" id="bookPageDisplay">
-                        ${currentBook.pages[0]}
+                        <b>[Page 1 / ${currentBook.pages.length}]</b><br><br>${currentBook.pages[0]}
                     </div>
                     <div id="bookControlsArea" style="display:flex; justify-content:center; gap:10px; margin-top:10px;">
                         ${mode === 'read' ? `
                             <button class="btn-submit" style="width:auto; padding:8px 16px;" onclick="prevBookPage()">⬅️ Previous</button>
-                            <button class="btn-submit" style="width:auto; padding:8px 16px;" onclick="nextBookPage()">Next ➔</button>
+                            <button class="btn-submit" style="width:auto; padding:8px 16px;" id="nextBookBtn" onclick="nextBookPage()">Next ➔</button>
                         ` : `
-                            <button class="btn-submit" style="width:auto; padding:8px 16px; background:#e53e3e;" onclick="stopUnityReader()">⏸️ Pause Listening</button>
+                            <button class="btn-submit" style="width:auto; padding:8px 16px; background:#e53e3e;" onclick="stopBookListening()">⏸️ Stop Listening</button>
                         `}
                     </div>
                 </div>
-                <div id="submitBookArea" style="margin-top:15px;">
-                    <button class="btn-submit" style="background:#28a745;" onclick="submitBookReading('${bookId}')">✅ Submit Reading (Okumayı Gönder)</button>
+                <div id="finishBookBtnArea" class="hidden" style="margin-top:15px;">
+                    <button class="btn-submit" style="background:#28a745;" onclick="completeBookTask('${bookId}')">🎉 Finish / Close</button>
                 </div>
             `);
 
             if (mode === 'listen') {
                 playBookListening();
+            } else {
+                checkBookPageEnd();
             }
         }
 
         function playBookListening() {
             window.speechSynthesis.cancel();
+            
             if (currentBookPageIndex >= currentBook.pages.length) {
-                document.getElementById('bookPageDisplay').innerHTML = "<b>🎉 The book reading is finished! You can click 'Submit Reading'.</b>";
+                document.getElementById('finishBookBtnArea').classList.remove('hidden');
+                document.getElementById('bookPageDisplay').innerHTML = "<b>🎉 Listening completed! Click 'Finish / Close' button below.</b>";
                 return;
             }
 
             const pageText = currentBook.pages[currentBookPageIndex];
-            document.getElementById('bookPageDisplay').innerText = pageText;
+            document.getElementById('bookPageDisplay').innerHTML = `<b>[Page ${currentBookPageIndex + 1} / ${currentBook.pages.length}]</b><br><br>${pageText}`;
 
+            // SESLİ OKUMA: Sayfa etiketi okunmaz, sadece asıl metin okunur
             const utterance = new SpeechSynthesisUtterance(pageText);
             utterance.lang = 'en-US';
             utterance.rate = 0.9;
@@ -700,54 +716,79 @@
             utterance.onend = function() {
                 currentBookPageIndex++;
                 if (currentBookPageIndex < currentBook.pages.length) {
-                    setTimeout(() => { playBookListening(); }, 1200);
+                    setTimeout(() => { playBookListening(); }, 1000);
                 } else {
-                    document.getElementById('bookPageDisplay').innerHTML = "<b>🎉 The book reading is finished! Click 'Submit Reading' below.</b>";
+                    document.getElementById('finishBookBtnArea').classList.remove('hidden');
+                    document.getElementById('bookPageDisplay').innerHTML = "<b>🎉 Listening completed! Click 'Finish / Close' button below.</b>";
                 }
             };
 
             window.speechSynthesis.speak(utterance);
         }
 
+        function stopBookListening() {
+            window.speechSynthesis.cancel();
+            document.getElementById('bookPageDisplay').innerHTML += "<br><br><b>⏸️ Listening paused.</b>";
+        }
+
         function prevBookPage() {
             if (currentBookPageIndex > 0) {
                 currentBookPageIndex--;
-                document.getElementById('bookPageDisplay').innerText = currentBook.pages[currentBookPageIndex];
+                document.getElementById('bookPageDisplay').innerHTML = `<b>[Page ${currentBookPageIndex + 1} / ${currentBook.pages.length}]</b><br><br>${currentBook.pages[currentBookPageIndex]}`;
+                checkBookPageEnd();
             }
         }
 
         function nextBookPage() {
             if (currentBookPageIndex < currentBook.pages.length - 1) {
                 currentBookPageIndex++;
-                document.getElementById('bookPageDisplay').innerText = currentBook.pages[currentBookPageIndex];
+                document.getElementById('bookPageDisplay').innerHTML = `<b>[Page ${currentBookPageIndex + 1} / ${currentBook.pages.length}]</b><br><br>${currentBook.pages[currentBookPageIndex]}`;
+                checkBookPageEnd();
             }
         }
 
-        function submitBookReading(bookId) {
+        function checkBookPageEnd() {
+            if (currentBookPageIndex === currentBook.pages.length - 1) {
+                document.getElementById('finishBookBtnArea').classList.remove('hidden');
+            }
+        }
+
+        function completeBookTask(bookId) {
             window.speechSynthesis.cancel();
-            completedBooks[bookId] = true;
-            alert("Congratulations! Book reading submitted successfully. Green tick added! ✅");
+            if (!bookProgress[bookId]) {
+                bookProgress[bookId] = { read: false, listen: false };
+            }
+
+            if (currentBookMode === 'read') bookProgress[bookId].read = true;
+            if (currentBookMode === 'listen') bookProgress[bookId].listen = true;
+
+            const prog = bookProgress[bookId];
+            if (prog.read && prog.listen) {
+                alert("Awesome! You completed BOTH reading and listening! Green tick added ✅");
+            } else {
+                alert("Great job! Complete the other task (Read/Listen) to unlock the green tick ✅");
+            }
+
             closeModal();
             renderEnglishLibrary();
         }
 
+        // --- TÜRKÇE DERS ÜNİTELERİ ---
         function renderUnits(subjectName) {
             const container = document.getElementById('unitListContainer');
             container.innerHTML = "";
-
-            const isEng = (subjectName === 'İngilizce');
 
             for (let i = 1; i <= 6; i++) {
                 container.innerHTML += `
                     <div class="unit-card">
                         <div class="unit-header" onclick="toggleUnit(${i})">
-                            <span>📌 ${isEng ? 'Unit' : 'Ünite'} ${i}: ${subjectName}</span>
+                            <span>📌 Ünite ${i}: ${subjectName}</span>
                             <span id="unitIcon-${i}">➕</span>
                         </div>
                         <div class="unit-body hidden" id="unitBody-${i}">
-                            <button class="action-btn" onclick="openUnityReader(${i})">📖 ${isEng ? 'Unity Text Reading (Auto Voice AI)' : 'Unity Yazı Okuma (Otomatik Sesli Asistan)'}</button>
-                            <button class="action-btn" onclick="startWork(${i})">📝 ${isEng ? 'Unit Activity (Drag & Drop)' : 'Ünite Çalışması (Sürüklemeli 5 Soru)'}</button>
-                            <button class="action-btn" onclick="openQuiz(${i})">🎯 ${isEng ? 'Unit Assessment Test (10 Questions)' : 'Konu Tarama Testi (10 Soru)'}</button>
+                            <button class="action-btn" onclick="openUnityReader(${i})">📖 Unity Yazı Okuma (Otomatik Sesli Asistan)</button>
+                            <button class="action-btn" onclick="startWork(${i})">📝 Ünite Çalışması (Sürüklemeli 5 Soru)</button>
+                            <button class="action-btn" onclick="openQuiz(${i})">🎯 Konu Tarama Testi (10 Soru)</button>
                         </div>
                     </div>
                 `;
@@ -766,21 +807,19 @@
             }
         }
 
-        // --- UNITY YAZI OKUMA (HER DERS KENDİ DİLİNDE) ---
+        // --- UNITY YAZI OKUMA ---
         function openUnityReader(unitNo) {
             currentUnityTexts = unityReadDatabase[currentUser.currentSubject] || unityReadDatabase["Hayat Bilgisi"];
             currentUnityIndex = 0;
 
-            const isEng = (currentUser.currentSubject === 'İngilizce');
-
             showModal(`
-                <h3>📖 ${isEng ? 'Unit' : 'Ünite'} ${unitNo} - ${currentUser.currentSubject} Unity ${isEng ? 'Reading' : 'Yazı Okuma'}</h3>
+                <h3>📖 Ünite ${unitNo} - ${currentUser.currentSubject} Unity Yazı Okuma</h3>
                 <div class="unity-reader-box">
                     <div class="unity-screen" id="unityTextDisplay">
-                        ${isEng ? 'Reading texts automatically...' : 'Yazılar otomatik olarak okunuyor...'}
+                        Yazılar otomatik olarak okunuyor...
                     </div>
                     <div style="display:flex; justify-content:center; gap:10px;">
-                        <button class="btn-submit" style="width:auto; padding:8px 16px; background:#e53e3e;" onclick="closeModal()">${isEng ? 'Finish / Close' : 'Okumayı Bitir / Kapat'}</button>
+                        <button class="btn-submit" style="width:auto; padding:8px 16px; background:#e53e3e;" onclick="closeModal()">Okumayı Bitir / Kapat</button>
                     </div>
                 </div>
             `);
@@ -792,17 +831,18 @@
             window.speechSynthesis.cancel();
             
             if (currentUnityIndex >= currentUnityTexts.length) {
-                document.getElementById('unityTextDisplay').innerHTML += "<br><br><b>🎉 All texts read successfully!</b>";
+                document.getElementById('unityTextDisplay').innerHTML += "<br><br><b>🎉 Tüm yazılar başarıyla okundu!</b>";
                 return;
             }
 
             const textToRead = currentUnityTexts[currentUnityIndex];
-            const isEng = (currentUser.currentSubject === 'İngilizce');
 
-            document.getElementById('unityTextDisplay').innerHTML = `<b>[${isEng ? 'Text' : 'Yazı'} ${currentUnityIndex + 1} / ${currentUnityTexts.length}]</b><br><br>${textToRead}`;
+            // Ekranda kaçıncı yazı olduğu gösterilir
+            document.getElementById('unityTextDisplay').innerHTML = `<b>[Yazı ${currentUnityIndex + 1} / ${currentUnityTexts.length}]</b><br><br>${textToRead}`;
 
+            // SESLİ OKUMA: "1. Yazı" denmez, doğrudan 'textToRead' metni seslendirilir
             const utterance = new SpeechSynthesisUtterance(textToRead);
-            utterance.lang = isEng ? 'en-US' : 'tr-TR';
+            utterance.lang = 'tr-TR';
             utterance.rate = 0.95;
 
             utterance.onend = function() {
@@ -810,7 +850,7 @@
                 if (currentUnityIndex < currentUnityTexts.length) {
                     setTimeout(() => { playNextUnityText(); }, 1000);
                 } else {
-                    document.getElementById('unityTextDisplay').innerHTML += `<br><br><b>🎉 ${isEng ? 'All texts read!' : 'Tüm yazılar başarıyla okundu!'}</b>`;
+                    document.getElementById('unityTextDisplay').innerHTML += "<br><br><b>🎉 Tüm yazılar başarıyla okundu!</b>";
                 }
             };
 
@@ -827,26 +867,25 @@
         function renderWorkQuestion(unitNo) {
             const list = workDatabase[currentUser.currentSubject] || workDatabase["Hayat Bilgisi"];
             const qData = list[workStep - 1];
-            const isEng = (currentUser.currentSubject === 'İngilizce');
 
             let optionsHtml = qData.options.map(opt => `
                 <div class="draggable-item" draggable="true" ondragstart="drag(event, '${opt}')">${opt}</div>
             `).join('');
 
             showModal(`
-                <h3>📝 ${isEng ? 'Unit' : 'Ünite'} ${unitNo} ${isEng ? 'Activity' : 'Çalışması'} (${workStep} / 5)</h3>
-                <p style="font-size:16px;"><b>${isEng ? 'Question' : 'Soru'} ${workStep}:</b> ${qData.q}</p>
-                <p style="font-size:13px; color:#718096;">${isEng ? 'Drag correct answer into box:' : 'Doğru cevabı kutunun içine sürükleyin:'}</p>
+                <h3>📝 Ünite ${unitNo} Çalışması (${workStep} / 5)</h3>
+                <p style="font-size:16px;"><b>Soru ${workStep}:</b> ${qData.q}</p>
+                <p style="font-size:13px; color:#718096;">Doğru cevabı kutunun içine sürükleyin:</p>
                 <div class="drag-container">${optionsHtml}</div>
 
                 <div class="drop-target" id="dropArea" ondrop="drop(event)" ondragover="allowDrop(event)">
-                    ${isEng ? 'Drag Answer Here' : 'Cevabı Buraya Sürükleyin'}
+                    Cevabı Buraya Sürükleyin
                 </div>
 
                 <div style="margin-top:20px;">
                     ${workStep < 5 
-                        ? `<button class="btn-submit" onclick="nextWorkQuestion(${unitNo})">${isEng ? 'Next Question ➔' : 'Sonraki Soruya Geç ➔'}</button>`
-                        : `<button class="btn-submit" style="background:#28a745;" onclick="finishWork()">${isEng ? 'See Results 📊' : 'Doğru ve Yanlışları Gör 📊'}</button>`
+                        ? `<button class="btn-submit" onclick="nextWorkQuestion(${unitNo})">Sonraki Soruya Geç ➔</button>`
+                        : `<button class="btn-submit" style="background:#28a745;" onclick="finishWork()">Doğru ve Yanlışları Gör 📊</button>`
                     }
                 </div>
             `);
@@ -857,14 +896,14 @@
         function drop(ev) {
             ev.preventDefault();
             const target = document.getElementById('dropArea');
-            target.innerText = `Selected: ${draggedText}`;
+            target.innerText = `Seçilen: ${draggedText}`;
             target.style.background = "#e2e8f0";
             workAnswers[workStep - 1] = draggedText;
         }
 
         function nextWorkQuestion(unitNo) {
             if (!workAnswers[workStep - 1]) {
-                alert(currentUser.currentSubject === 'İngilizce' ? "Please drag an answer first!" : "Lütfen önce cevabı kutunun içine sürükleyin!");
+                alert("Lütfen önce cevabı kutunun içine sürükleyin!");
                 return;
             }
             workStep++;
@@ -873,26 +912,25 @@
 
         function finishWork() {
             if (!workAnswers[4]) {
-                alert(currentUser.currentSubject === 'İngilizce' ? "Please drag an answer first!" : "Lütfen önce cevabı kutunun içine sürükleyin!");
+                alert("Lütfen önce cevabı kutunun içine sürükleyin!");
                 return;
             }
 
             const list = workDatabase[currentUser.currentSubject] || workDatabase["Hayat Bilgisi"];
-            const isEng = (currentUser.currentSubject === 'İngilizce');
-            let resultHtml = `<h3>📊 ${isEng ? 'Activity Results' : 'Ünite Çalışması Sonuçları'}</h3>`;
+            let resultHtml = `<h3>📊 Ünite Çalışması Sonuçları</h3>`;
 
             list.forEach((item, index) => {
                 const userAns = workAnswers[index];
                 const isCorrect = userAns === item.correct;
                 resultHtml += `
                     <div class="result-box ${isCorrect ? 'correct-bg' : 'wrong-bg'}">
-                        ${isEng ? 'Question' : 'Soru'} ${index + 1}: ${item.q}<br>
-                        ${isEng ? 'Your Answer' : 'Sizin Cevabınız'}: ${userAns} | ${isEng ? 'Correct Answer' : 'Doğru Cevap'}: ${item.correct} ${isCorrect ? '✅' : '❌'}
+                        Soru ${index + 1}: ${item.q}<br>
+                        Sizin Cevabınız: ${userAns} | Doğru Cevap: ${item.correct} ${isCorrect ? '✅' : '❌'}
                     </div>
                 `;
             });
 
-            resultHtml += `<button class="btn-submit" style="margin-top:15px;" onclick="closeModal()">${isEng ? 'Finish' : 'Çalışmayı Bitir'}</button>`;
+            resultHtml += `<button class="btn-submit" style="margin-top:15px;" onclick="closeModal()">Çalışmayı Bitir</button>`;
             showModal(resultHtml);
         }
 
@@ -900,14 +938,13 @@
         function openQuiz(unitNo) {
             quizAnswers = {};
             const list = quizDatabase[currentUser.currentSubject] || quizDatabase["Hayat Bilgisi"];
-            const isEng = (currentUser.currentSubject === 'İngilizce');
-            let questionsHtml = `<h3>🎯 ${isEng ? 'Unit' : 'Ünite'} ${unitNo} - ${currentUser.currentSubject} ${isEng ? 'Test' : 'Konu Tarama Testi'}</h3>`;
+            let questionsHtml = `<h3>🎯 Ünite ${unitNo} - ${currentUser.currentSubject} Konu Tarama Testi</h3>`;
 
             list.forEach((item, index) => {
                 const qNum = index + 1;
                 questionsHtml += `
                     <div style="margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:10px;">
-                        <b>${isEng ? 'Question' : 'Soru'} ${qNum}:</b> ${item.q}
+                        <b>Soru ${qNum}:</b> ${item.q}
                         ${item.options.map(opt => `
                             <div class="quiz-option" id="q_${qNum}_${opt[0]}" onclick="selectAnswer(${qNum}, '${opt[0]}')">${opt}</div>
                         `).join('')}
@@ -915,7 +952,7 @@
                 `;
             });
 
-            questionsHtml += `<button class="btn-submit" onclick="finishQuiz()">${isEng ? 'Finish Test' : 'Testi Bitir'}</button>`;
+            questionsHtml += `<button class="btn-submit" onclick="finishQuiz()">Testi Bitir</button>`;
             showModal(questionsHtml);
         }
 
@@ -930,13 +967,12 @@
 
         function finishQuiz() {
             if (Object.keys(quizAnswers).length < 10) {
-                alert(currentUser.currentSubject === 'İngilizce' ? "Please answer all questions." : "Lütfen tüm soruları cevaplayın.");
+                alert("Lütfen tüm soruları cevaplayın.");
                 return;
             }
 
             const list = quizDatabase[currentUser.currentSubject] || quizDatabase["Hayat Bilgisi"];
-            const isEng = (currentUser.currentSubject === 'İngilizce');
-            let resultHtml = `<h3>📊 ${isEng ? 'Test Results' : 'Test Sonuçlarınız ve Doğru/Yanlışlar'}</h3>`;
+            let resultHtml = `<h3>📊 Test Sonuçlarınız ve Doğru/Yanlışlar</h3>`;
 
             list.forEach((item, index) => {
                 const qNum = index + 1;
@@ -945,17 +981,17 @@
 
                 resultHtml += `
                     <div class="result-box ${isCorrect ? 'correct-bg' : 'wrong-bg'}">
-                        <b>${isEng ? 'Question' : 'Soru'} ${qNum}:</b> ${item.q}<br>
-                        ${isEng ? 'Your Answer' : 'Sizin Cevabınız'}: ${userAns} | ${isEng ? 'Correct Answer' : 'Doğru Cevap'}: ${item.ans} ${isCorrect ? '✅' : '❌'}
+                        <b>Soru ${qNum}:</b> ${item.q}<br>
+                        Sizin Cevabınız: ${userAns} | Doğru Cevap: ${item.ans} ${isCorrect ? '✅' : '❌'}
                     </div>
                 `;
             });
 
-            resultHtml += `<button class="btn-submit" style="margin-top:15px;" onclick="closeModal()">${isEng ? 'Complete' : 'Testi Tamamla'}</button>`;
+            resultHtml += `<button class="btn-submit" style="margin-top:15px;" onclick="closeModal()">Testi Tamamla</button>`;
             showModal(resultHtml);
         }
 
-        // --- YAPAY ZEKA SOHBETİ (DİL DUYARLI) ---
+        // --- YAPAY ZEKA SOHBETİ ---
         function toggleAiDrawer() {
             document.getElementById('aiDrawer').classList.toggle('open');
         }
@@ -967,14 +1003,14 @@
             if (isEng) {
                 chatBody.innerHTML = `
                     <div class="ai-message bot">
-                        Hello! I am your English AI tutor. You can chat with me, ask questions, or practice English! 💡
-                        <br><span class="speak-btn" onclick="speakText('Hello! I am your English AI tutor. You can chat with me!')">🔊 Listen</span>
+                        Hello! I am your English AI tutor. You can chat with me or practice English! 💡
+                        <br><span class="speak-btn" onclick="speakText('Hello! I am your English AI tutor.')">🔊 Listen</span>
                     </div>
                 `;
             } else {
                 chatBody.innerHTML = `
                     <div class="ai-message bot">
-                        Merhaba! Ben sizin kişisel öğretici yapay zekanızım. Benimle konuşabilir, nasılsın gibi sorular sorabilir veya dersler hakkında bilgi alabilirsin! 💡
+                        Merhaba! Ben sizin kişisel öğretici yapay zekanızım. Benimle konuşabilir veya sorular sorabilirsin! 💡
                         <br><span class="speak-btn" onclick="speakText('Merhaba! Ben sizin kişisel öğretici yapay zekanızım.')">🔊 Sesli Oku</span>
                     </div>
                 `;
@@ -1015,7 +1051,7 @@
                     } else if (lowerText.includes('how are you')) {
                         botReply = "I am doing great, thank you! How is your learning going?";
                     } else {
-                        botReply = "That is a great practice sentence! Keep reading English stories to improve faster.";
+                        botReply = "That is a great sentence! Keep reading English stories in the library.";
                     }
                 } else {
                     if (lowerText.includes('kod yaz') || lowerText.includes('program yaz') || lowerText.includes('html yaz')) {
@@ -1025,7 +1061,7 @@
                     } else if (lowerText.includes('nasılsın') || lowerText.includes('iyi misin')) {
                         botReply = "Çok teşekkür ederim, harikayım! Sen nasılsın, derslerin nasıl gidiyor?";
                     } else {
-                        botReply = "Anladım! Derslerinde başarılı olmak için ünite çalışmalarını tam zamanında yapman çok faydalı olacaktır.";
+                        botReply = "Anladım! Derslerinde başarılı olmak için ünite çalışmalarını yapman çok faydalı olacaktır.";
                     }
                 }
 
